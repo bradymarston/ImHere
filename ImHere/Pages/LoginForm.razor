@@ -1,0 +1,69 @@
+﻿@page "/loginForm"
+
+@using ImHere.Models
+@using ImHere.Services
+@using Microsoft.AspNetCore.Identity;
+@inject AccountService _accountService
+@inject NavigationManager _navigationManager
+
+<h1>Log In</h1>
+
+<EditForm Model="@loginModel" OnValidSubmit="@Login">
+    <DataAnnotationsValidator />
+    <div class="text-danger">@errorText</div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <InputText @bind-Value="@loginModel.Email"
+                   class="form-control"
+                   id="email"
+                   placeholder="Email" />
+        <ValidationMessage For="@(() => loginModel.Email)" />
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <InputText @bind-Value="@loginModel.Password"
+                   type="password"
+                   class="form-control"
+                   id="password"
+                   placeholder="Password" />
+        <ValidationMessage For="@(() => loginModel.Password)" />
+    </div>
+    <div class="form-group form-check">
+        <InputCheckbox @bind-Value="@loginModel.RememberMe" 
+                       class="form-check-input" 
+                       id="rememberMe" />
+        <label for="rememberMe" 
+               class="form-check-label">
+            Remember me
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary">Log In</button>
+    <NavLink class="btn btn-secondary" href="">Cancel</NavLink>
+</EditForm>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private string errorText = "";
+
+
+    private async Task Login()
+    {
+        errorText = "";
+        var result = await _accountService.LoginAsync(loginModel);
+
+        if (result.Succeeded)
+            _navigationManager.NavigateTo("/");
+
+        if (result.RequiresTwoFactor)
+            errorText = "Requires two factor authentication (not supported).";
+        else
+            if (result.IsLockedOut)
+                errorText = "Account locked out. Please try again later.";
+            else
+                if (result.IsNotAllowed)
+                    errorText = "Account not confirmed.";
+                else
+                    errorText = "Invalid login attempt.";
+    }
+}
