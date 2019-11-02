@@ -13,4 +13,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.0-preview1.19506.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="ShadySoft.EntityPersistence">
+      <HintPath>..\..\ShadySoft.EntityPersistence\ShadySoft.EntityPersistence\bin\Release\netcoreapp3.0\ShadySoft.EntityPersistence.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

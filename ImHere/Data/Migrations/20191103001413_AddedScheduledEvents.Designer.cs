@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ImHere.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20191102202534_AddEvents")]
-    partial class AddEvents
+    [Migration("20191103001413_AddedScheduledEvents")]
+    partial class AddedScheduledEvents
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,9 +21,9 @@ namespace ImHere.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("ImHere.Models.Event", b =>
+            modelBuilder.Entity("ImHere.Data.Models.ScheduledEvent", b =>
                 {
-                    b.Property<int>("EventId")
+                    b.Property<int>("ScheduledEventId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -43,9 +43,9 @@ namespace ImHere.Data.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("EventId");
+                    b.HasKey("ScheduledEventId");
 
-                    b.ToTable("Events");
+                    b.ToTable("ScheduledEvents");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

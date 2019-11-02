@@ -17,6 +17,7 @@ using ImHere.Areas.Identity;
 using ImHere.Data;
 using ImHere.Services;
 using Microsoft.AspNetCore.Components.Server;
+using ShadySoft.EntityPersistence;
 
 namespace ImHere
 {
@@ -33,7 +34,7 @@ namespace ImHere
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddPersistence<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)

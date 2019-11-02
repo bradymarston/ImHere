@@ -3,15 +3,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ImHere.Data.Migrations
 {
-    public partial class AddEvents : Migration
+    public partial class AddedScheduledEvents : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Events",
+                name: "ScheduledEvents",
                 columns: table => new
                 {
-                    EventId = table.Column<int>(nullable: false)
+                    ScheduledEventId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(nullable: true),
                     StartTime = table.Column<DateTime>(nullable: false),
@@ -21,14 +21,14 @@ namespace ImHere.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Events", x => x.EventId);
+                    table.PrimaryKey("PK_ScheduledEvents", x => x.ScheduledEventId);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Events");
+                name: "ScheduledEvents");
         }
     }
 }
