@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using ImHere.Areas.Identity;
 using ImHere.Data;
 using ImHere.Services;
+using Microsoft.AspNetCore.Components.Server;
 
 namespace ImHere
 {
@@ -37,9 +38,16 @@ namespace ImHere
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
+
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+            services.AddScoped<IHostEnvironmentAuthenticationStateProvider>(sp => {
+                var provider = (ServerAuthenticationStateProvider)sp.GetRequiredService<AuthenticationStateProvider>();
+                return provider;
+            });
+
             services.AddScoped<AccountService>();
             services.AddSingleton<WeatherForecastService>();
         }

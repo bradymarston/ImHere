@@ -1,11 +1,15 @@
 ﻿using ImHere.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace ImHere.Services
@@ -14,18 +18,31 @@ namespace ImHere.Services
     {
         private readonly IJSRuntime _jSRuntime;
         private readonly IDataProtectionProvider _dataProtectionProvider;
-
+        private readonly AuthenticationStateProvider _authenticationStateProvider;
+        private readonly IHostEnvironmentAuthenticationStateProvider _hostAuthenticationStateProvider;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
         private const int loginExpirationSeconds = 5;
 
-        public AccountService(IJSRuntime jSRuntime, IDataProtectionProvider dataProtectionProvider)
+        public AccountService(
+            IJSRuntime jSRuntime,
+            IDataProtectionProvider dataProtectionProvider,
+            AuthenticationStateProvider authenticationStateProvider,
+            IHostEnvironmentAuthenticationStateProvider hostAuthenticationStateProvider,
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager)
         {
             _jSRuntime = jSRuntime;
             _dataProtectionProvider = dataProtectionProvider;
+            _authenticationStateProvider = authenticationStateProvider;
+            _hostAuthenticationStateProvider = hostAuthenticationStateProvider;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public Task<bool> LoginAsync(LoginModel loginModel)
         {
-            var callback = new LoginCallback();
+            var callback = new LoginCallback(loginModel, this);
 
             loginModel.ExpirationUTC = DateTime.UtcNow + TimeSpan.FromSeconds(loginExpirationSeconds);
             var protector = _dataProtectionProvider.CreateProtector("login");
@@ -35,16 +52,41 @@ namespace ImHere.Services
 
             return callback.ResultSource.Task;
         }
-    }
 
-    public class LoginCallback
-    {
-        public TaskCompletionSource<bool> ResultSource { get; set; } = new TaskCompletionSource<bool>();
-
-        [JSInvokable]
-        public void LoginComplete(bool result)
+        private async Task FinishLoginAsync(LoginModel loginModel)
         {
-            ResultSource.SetResult(result);
+            var user = await _userManager.FindByNameAsync(loginModel.Email);
+            var principal = await _signInManager.CreateUserPrincipalAsync(user);
+
+            var identity = new ClaimsIdentity(
+                principal.Claims,
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            principal = new ClaimsPrincipal(identity);
+            _signInManager.Context.User = principal;
+            _hostAuthenticationStateProvider.SetAuthenticationState(Task.FromResult(new AuthenticationState(principal)));
+        }
+
+        public class LoginCallback
+        {
+            private readonly AccountService _accountService;
+
+            public LoginCallback(LoginModel loginModel, AccountService accountService)
+            {
+                LoginModel = loginModel;
+                _accountService = accountService;
+            }
+
+            public TaskCompletionSource<bool> ResultSource { get; set; } = new TaskCompletionSource<bool>();
+            public LoginModel LoginModel { get; }
+
+            [JSInvokable]
+            public void LoginComplete(bool result)
+            {
+                ResultSource.SetResult(result);
+                if (result)
+                    _accountService.FinishLoginAsync(LoginModel);
+            }
         }
     }
 }
