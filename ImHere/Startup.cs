@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ImHere.Areas.Identity;
 using ImHere.Data;
+using ImHere.Services;
 
 namespace ImHere
 {
@@ -39,6 +40,7 @@ namespace ImHere
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+            services.AddScoped<AccountService>();
             services.AddSingleton<WeatherForecastService>();
         }
 

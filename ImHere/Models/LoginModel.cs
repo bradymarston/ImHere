@@ -18,5 +18,7 @@ namespace ImHere.Models
 
         [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
+
+        public DateTime ExpirationUTC { get; set; }
     }
 }
