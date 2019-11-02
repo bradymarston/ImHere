@@ -1,4 +1,5 @@
 ﻿using ImHere.Models;
+using ImHere.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -31,9 +32,10 @@ namespace ImHere.Controllers
         public async Task<IActionResult> Login(string encodedLoginModel)
         {
             string errorMessage;
+            string errorCode;
 
             var protector = _dataProtectionProvider.CreateProtector("login");
-            var decodedLoginModel = "";
+            string decodedLoginModel;
             LoginModel loginModel;
 
             try
@@ -43,15 +45,13 @@ namespace ImHere.Controllers
             catch (CryptographicException)
             {
                 _logger.LogWarning("Invalid login data submitted");
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return BadRequest();
+                return BadRequest(AccountServiceLoginResults.Failed);
             }
 
             if (string.IsNullOrWhiteSpace(decodedLoginModel))
             {
                 _logger.LogWarning("Invalid login data submitted");
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return BadRequest();
+                return BadRequest(AccountServiceLoginResults.Failed);
             }
 
             try
@@ -61,15 +61,13 @@ namespace ImHere.Controllers
             catch
             {
                 _logger.LogWarning("Invalid login data submitted");
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return BadRequest();
+                return BadRequest(AccountServiceLoginResults.Failed);
             }
 
             if (loginModel.ExpirationUTC < DateTime.UtcNow)
             {
                 _logger.LogWarning("Expired login data submitted");
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return BadRequest();
+                return BadRequest(AccountServiceLoginResults.Failed);
             }
 
             // This doesn't count login failures towards account lockout
@@ -78,27 +76,38 @@ namespace ImHere.Controllers
             if (result.Succeeded)
             {
                 _logger.LogInformation("User logged in.");
-                return Ok();
+                return Ok(AccountServiceLoginResults.Succeeded);
             }
             if (result.RequiresTwoFactor)
             {
                 errorMessage = "Requires two factor authentication (not supported).";
+                errorCode = AccountServiceLoginResults.RequiresTwoFactor;
             }
             else
             {
                 if (result.IsLockedOut)
                 {
                     errorMessage = "User account locked out.";
+                    errorCode = AccountServiceLoginResults.IsLockedOut;
                 }
                 else
                 {
-                    errorMessage = "Invalid login attempt.";
+                    if (result.IsNotAllowed)
+                    {
+                        errorMessage = "Account not confirmed.";
+                        errorCode = AccountServiceLoginResults.IsNotAllowed;
+                    }
+                    else
+                    {
+                        errorMessage = "Invalid login attempt.";
+                        errorCode = AccountServiceLoginResults.Failed;
+                    }
                 }
             }
 
             _logger.LogWarning(errorMessage);
-            ModelState.AddModelError(string.Empty, errorMessage);
-            return BadRequest();
+            return BadRequest(errorCode);
+
         }
     }
 }

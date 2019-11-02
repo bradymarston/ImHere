@@ -40,7 +40,7 @@ namespace ImHere.Services
             _signInManager = signInManager;
         }
 
-        public Task<bool> LoginAsync(LoginModel loginModel)
+        public Task<SignInResult> LoginAsync(LoginModel loginModel)
         {
             var callback = new LoginCallback(loginModel, this);
 
@@ -77,16 +77,35 @@ namespace ImHere.Services
                 _accountService = accountService;
             }
 
-            public TaskCompletionSource<bool> ResultSource { get; set; } = new TaskCompletionSource<bool>();
+            public TaskCompletionSource<SignInResult> ResultSource { get; set; } = new TaskCompletionSource<SignInResult>();
             public LoginModel LoginModel { get; }
 
             [JSInvokable]
-            public void LoginComplete(bool result)
+            public void LoginComplete(string result)
             {
-                ResultSource.SetResult(result);
-                if (result)
+
+                var signInResult = result switch
+                {
+                    AccountServiceLoginResults.Succeeded => SignInResult.Success,
+                    AccountServiceLoginResults.RequiresTwoFactor => SignInResult.TwoFactorRequired,
+                    AccountServiceLoginResults.IsLockedOut => SignInResult.LockedOut,
+                    AccountServiceLoginResults.IsNotAllowed => SignInResult.NotAllowed,
+                    _ => SignInResult.Failed,
+                };
+
+                ResultSource.SetResult(signInResult);
+                if (signInResult.Succeeded)
                     _accountService.FinishLoginAsync(LoginModel);
             }
         }
+    }
+
+    public static class AccountServiceLoginResults
+    {
+        public const string Succeeded = "Succeeded";
+        public const string Failed = "Failed";
+        public const string RequiresTwoFactor = "RequiresTwoFactor";
+        public const string IsLockedOut = "IsLockedOut";
+        public const string IsNotAllowed = "IsNotAllowed";
     }
 }
