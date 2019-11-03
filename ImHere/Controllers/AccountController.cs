@@ -1,4 +1,4 @@
-﻿using ImHere.Models;
+﻿using ImHere.ViewModels;
 using ImHere.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -36,7 +36,7 @@ namespace ImHere.Controllers
 
             var protector = _dataProtectionProvider.CreateProtector("login");
             string decodedLoginModel;
-            LoginModel loginModel;
+            LoginViewModel loginModel;
 
             try
             {
@@ -56,7 +56,7 @@ namespace ImHere.Controllers
 
             try
             {
-                loginModel = JsonConvert.DeserializeObject<LoginModel>(decodedLoginModel);
+                loginModel = JsonConvert.DeserializeObject<LoginViewModel>(decodedLoginModel);
             }
             catch
             {

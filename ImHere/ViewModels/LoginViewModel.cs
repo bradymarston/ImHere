@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ImHere.Models
+namespace ImHere.ViewModels
 {
-    public class LoginModel
+    public class LoginViewModel
     {
         [Required]
         [EmailAddress]
