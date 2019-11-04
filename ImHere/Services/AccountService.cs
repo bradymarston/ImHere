@@ -1,4 +1,4 @@
-﻿using ImHere.ViewModels;
+﻿using ImHere.Services.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -40,7 +40,7 @@ namespace ImHere.Services
             _signInManager = signInManager;
         }
 
-        public Task<SignInResult> LoginAsync(LoginViewModel loginModel)
+        public Task<SignInResult> LoginAsync(LoginModel loginModel)
         {
             var callback = new LoginCallback(loginModel, this);
 
@@ -53,7 +53,7 @@ namespace ImHere.Services
             return callback.ResultSource.Task;
         }
 
-        private async Task FinishLoginAsync(LoginViewModel loginModel)
+        private async Task FinishServerLoginAsync(LoginModel loginModel)
         {
             var user = await _userManager.FindByNameAsync(loginModel.Email);
             var principal = await _signInManager.CreateUserPrincipalAsync(user);
@@ -71,17 +71,17 @@ namespace ImHere.Services
         {
             private readonly AccountService _accountService;
 
-            public LoginCallback(LoginViewModel loginModel, AccountService accountService)
+            public LoginCallback(LoginModel loginModel, AccountService accountService)
             {
                 LoginModel = loginModel;
                 _accountService = accountService;
             }
 
             public TaskCompletionSource<SignInResult> ResultSource { get; set; } = new TaskCompletionSource<SignInResult>();
-            public LoginViewModel LoginModel { get; }
+            public LoginModel LoginModel { get; }
 
             [JSInvokable]
-            public void LoginComplete(string result)
+            public void ClientLoginComplete(string result)
             {
 
                 var signInResult = result switch
@@ -95,7 +95,7 @@ namespace ImHere.Services
 
                 ResultSource.SetResult(signInResult);
                 if (signInResult.Succeeded)
-                    _accountService.FinishLoginAsync(LoginModel);
+                    _accountService.FinishServerLoginAsync(LoginModel);
             }
         }
     }

@@ -1,6 +1,6 @@
 ﻿@page "/loginForm"
 
-@using ImHere.ViewModels
+@using ImHere.Services.Models
 @using ImHere.Services
 @using Microsoft.AspNetCore.Identity;
 @inject AccountService _accountService
@@ -43,7 +43,7 @@
 </EditForm>
 
 @code {
-    private LoginViewModel loginModel = new LoginViewModel();
+    private LoginModel loginModel = new LoginModel();
     private string errorText = "";
 
 
@@ -59,11 +59,11 @@
             errorText = "Requires two factor authentication (not supported).";
         else
             if (result.IsLockedOut)
-                errorText = "Account locked out. Please try again later.";
-            else
+            errorText = "Account locked out. Please try again later.";
+        else
                 if (result.IsNotAllowed)
-                    errorText = "Account not confirmed.";
-                else
-                    errorText = "Invalid login attempt.";
+            errorText = "Account not confirmed.";
+        else
+            errorText = "Invalid login attempt.";
     }
 }

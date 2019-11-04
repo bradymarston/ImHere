@@ -8,7 +8,7 @@
 
         xhr.onreadystatechange = function () { // Call a function when the state changes.
             if (this.readyState === XMLHttpRequest.DONE) {
-                callbackObject.invokeMethodAsync('LoginComplete', this.responseText);
+                callbackObject.invokeMethodAsync('ClientLoginComplete', this.responseText);
             }
         };
 
