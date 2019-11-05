@@ -1,0 +1,97 @@
+﻿@page "/events"
+
+@using ImHere.Data.Models
+@using ShadySoft.EntityPersistence
+
+@inject IRepository<EventBase> _eventRepository
+@inject IUnitOfWork _unitOfWork
+
+<h3>Event Form</h3>
+
+<EditForm Model="@currentEvent" OnValidSubmit="@CreateEventAsync">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <label for="event-name">Event Name</label>
+        <InputText id="event-name" class="form-control" @bind-Value="@currentEvent.Name" placeholder="New Event" />
+    </div>
+    <div class="form-row">
+        <div class="form-group col-sm-6">
+            <label for="start-time">Start Time</label>
+            <InputTime id="start-time" class="form-control" @bind-Value="@currentEvent.StartTime" />
+            <ValidationMessage For="@(() => currentEvent.StartTime)" />
+        </div>
+        <div class="form-group col-sm-6">
+            <label for="duration">Duration (in hours)</label>
+            <InputTimeSpan id="duration" class="form-control" @bind-Value="@currentEvent.Duration" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="schedule-type">Schedule Type</label>
+            <select id="schedule-type" class="form-control" value="@scheduleType" @onchange="ChangeScheduleType">
+                <option value="once">One Time</option>
+                <option value="weekly">Weekly</option>
+            </select>
+        </div>
+        @if (currentEvent.GetType() == typeof(OneTimeEvent))
+        {
+            <div class="form-group col-md-6">
+                <label for="date">Date</label>
+                <InputDate id="date" class="form-control" @bind-Value="((OneTimeEvent)currentEvent).Date" />
+            </div>
+        }
+        @if (currentEvent.GetType() == typeof(WeeklyEvent))
+        {
+            <div class="form-group col-md-6">
+                <label for="day">Day of Week</label>
+                <InputSelect id="day" class="form-control" @bind-Value="((WeeklyEvent)currentEvent).Day">
+                    @foreach (var day in Enum.GetValues(typeof(DayOfWeek)))
+                        {
+                        <option value="@day">@day</option>
+                        }
+                    /**/
+                    /**/
+                    /**/
+                </InputSelect>
+            </div>
+        }
+    </div>
+    <button type="submit" class="btn btn-primary">Create Event</button>
+</EditForm>
+
+@code {
+    private EventBase currentEvent = new OneTimeEvent();
+    private string scheduleType = "once";
+
+    protected async override Task OnInitializedAsync()
+    {
+        currentEvent = await _eventRepository.GetAsync(1);
+    }
+
+    private void ChangeScheduleType(ChangeEventArgs e)
+    {
+        scheduleType = (string)e.Value;
+
+        EventBase newEvent = scheduleType switch
+        {
+            "weekly" => new WeeklyEvent(),
+            _ => new OneTimeEvent()
+        };
+
+        if (currentEvent.GetType() == newEvent.GetType())
+            return;
+
+        newEvent.EventId = currentEvent.EventId;
+        newEvent.Name = currentEvent.Name;
+
+        currentEvent = newEvent;
+        StateHasChanged();
+    }
+
+    private async Task CreateEventAsync(EditContext context)
+    {
+        _eventRepository.Add(currentEvent);
+
+        await _unitOfWork.CompleteAsync();
+    }
+}

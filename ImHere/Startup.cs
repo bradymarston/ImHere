@@ -18,6 +18,7 @@ using ImHere.Data;
 using ImHere.Services;
 using Microsoft.AspNetCore.Components.Server;
 using ShadySoft.EntityPersistence;
+using ImHere.Data.Models;
 
 namespace ImHere
 {
@@ -51,6 +52,7 @@ namespace ImHere
 
             services.AddScoped<AccountService>();
             services.AddSingleton<WeatherForecastService>();
+            services.AddDefaultRepository<EventBase, ApplicationDbContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
