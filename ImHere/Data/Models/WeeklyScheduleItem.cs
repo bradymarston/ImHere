@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ImHere.Data.Models
 {
-    public class WeeklyEvent : EventBase
+    public class WeeklyScheduleItem : ScheduleItemBase
     {
         [Required]
         public DayOfWeek Day { get; set; }

@@ -9,18 +9,13 @@ namespace ImHere.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {
-        public DbSet<OneTimeEvent> OneTimeEventsItems { get; set; }
-        public DbSet<WeeklyEvent> WeeklyEventsItems { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<OneTimeScheduleItem> OneTimeScheduleItems { get; set; }
+        public DbSet<WeeklyScheduleItem> WeeklyScheduleItems { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-        }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            builder.Entity<EventBase>().HasKey(e => e.EventId);
-            base.OnModelCreating(builder);
         }
     }
 }
