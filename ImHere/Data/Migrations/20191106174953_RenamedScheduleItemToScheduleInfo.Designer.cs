@@ -4,14 +4,16 @@ using ImHere.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ImHere.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191106174953_RenamedScheduleItemToScheduleInfo")]
+    partial class RenamedScheduleItemToScheduleInfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,7 +32,13 @@ namespace ImHere.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ScheduleId")
+                        .IsUnique();
 
                     b.ToTable("Events");
                 });
@@ -49,16 +57,10 @@ namespace ImHere.Data.Migrations
                     b.Property<TimeSpan>("Duration")
                         .HasColumnType("time");
 
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EventId")
-                        .IsUnique();
 
                     b.ToTable("EventScheduleInfoBase");
 
@@ -285,11 +287,11 @@ namespace ImHere.Data.Migrations
                     b.HasDiscriminator().HasValue("WeeklyScheduleInfo");
                 });
 
-            modelBuilder.Entity("ImHere.Data.Models.EventScheduleInfoBase", b =>
+            modelBuilder.Entity("ImHere.Data.Models.Event", b =>
                 {
-                    b.HasOne("ImHere.Data.Models.Event", "Event")
-                        .WithOne("Schedule")
-                        .HasForeignKey("ImHere.Data.Models.EventScheduleInfoBase", "EventId")
+                    b.HasOne("ImHere.Data.Models.EventScheduleInfoBase", "Schedule")
+                        .WithOne("Event")
+                        .HasForeignKey("ImHere.Data.Models.Event", "ScheduleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

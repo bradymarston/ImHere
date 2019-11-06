@@ -11,7 +11,6 @@ namespace ImHere.Data.Models
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
-        public int ScheduleId { get; set; }
-        public ScheduleItemBase Schedule { get; set; } = new OneTimeScheduleItem();
+        public EventScheduleInfoBase Schedule { get; set; } = new OneTimeScheduleInfo();
     }
 }

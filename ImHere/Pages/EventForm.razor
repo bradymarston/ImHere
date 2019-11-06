@@ -45,18 +45,18 @@
                         <option value="weekly">Weekly</option>
                     </select>
                 </div>
-                @if (currentEvent.Schedule.GetType() == typeof(OneTimeScheduleItem))
+                @if (currentEvent.Schedule.GetType() == typeof(OneTimeScheduleInfo))
                 {
                     <div class="form-group col-md-6">
                         <label for="date">Date</label>
-                        <InputDate id="date" class="form-control" @bind-Value="((OneTimeScheduleItem)currentEvent.Schedule).Date" />
+                        <InputDate id="date" class="form-control" @bind-Value="((OneTimeScheduleInfo)currentEvent.Schedule).Date" />
                     </div>
                 }
-                @if (currentEvent.Schedule.GetType() == typeof(WeeklyScheduleItem))
+                @if (currentEvent.Schedule.GetType() == typeof(WeeklyScheduleInfo))
                 {
                     <div class="form-group col-md-6">
                         <label for="day">Day of Week</label>
-                        <InputSelect id="day" class="form-control" @bind-Value="((WeeklyScheduleItem)currentEvent.Schedule).Day">
+                        <InputSelect id="day" class="form-control" @bind-Value="((WeeklyScheduleInfo)currentEvent.Schedule).Day">
                             @foreach (var day in Enum.GetValues(typeof(DayOfWeek)))
                                 {
                                 <option value="@day">@day</option>
@@ -105,10 +105,10 @@
     {
         scheduleType = (string)e.Value;
 
-        ScheduleItemBase newSchedule = scheduleType switch
+        EventScheduleInfoBase newSchedule = scheduleType switch
         {
-            "weekly" => new WeeklyScheduleItem(),
-            _ => new OneTimeScheduleItem()
+            "weekly" => new WeeklyScheduleInfo(),
+            _ => new OneTimeScheduleInfo()
         };
 
         if (currentEvent.Schedule.GetType() == newSchedule.GetType())

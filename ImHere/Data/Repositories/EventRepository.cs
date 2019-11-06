@@ -37,6 +37,6 @@ namespace ImHere.Data.Repositories
             _context.Events.Remove(item);
         }
 
-        private readonly Expression<Func<Event, ScheduleItemBase>> DefaultInclusion = (e) => e.Schedule;
+        private readonly Expression<Func<Event, EventScheduleInfoBase>> DefaultInclusion = (e) => e.Schedule;
     }
 }

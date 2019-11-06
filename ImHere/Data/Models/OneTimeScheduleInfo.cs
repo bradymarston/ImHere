@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ImHere.Data.Models
 {
-    public class OneTimeScheduleItem : ScheduleItemBase
+    public class OneTimeScheduleInfo : EventScheduleInfoBase
     {
         [Required]
         public DateTime Date { get; set; } = DateTime.UtcNow.Date;

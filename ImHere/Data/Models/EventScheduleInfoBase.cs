@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace ImHere.Data.Models
 {
-    public abstract class ScheduleItemBase
+    public abstract class EventScheduleInfoBase
     {
         public int Id { get; set; }
+        public int EventId { get; set; }
         public Event Event { get; set; }
         [Required]
         public DateTime StartTime { get; set; }
