@@ -1,4 +1,4 @@
-﻿using ImHere.Services.Models;
+﻿using ImHere.Services.Dtos;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -40,7 +40,7 @@ namespace ImHere.Services
             _signInManager = signInManager;
         }
 
-        public Task<SignInResult> LoginAsync(LoginModel loginModel)
+        public Task<SignInResult> LoginAsync(LoginDto loginModel)
         {
             var callback = new LoginCallback(loginModel, this);
 
@@ -53,7 +53,7 @@ namespace ImHere.Services
             return callback.ResultSource.Task;
         }
 
-        private async Task FinishServerLoginAsync(LoginModel loginModel)
+        private async Task FinishServerLoginAsync(LoginDto loginModel)
         {
             var user = await _userManager.FindByNameAsync(loginModel.Email);
             var principal = await _signInManager.CreateUserPrincipalAsync(user);
@@ -71,14 +71,14 @@ namespace ImHere.Services
         {
             private readonly AccountService _accountService;
 
-            public LoginCallback(LoginModel loginModel, AccountService accountService)
+            public LoginCallback(LoginDto loginModel, AccountService accountService)
             {
                 LoginModel = loginModel;
                 _accountService = accountService;
             }
 
             public TaskCompletionSource<SignInResult> ResultSource { get; set; } = new TaskCompletionSource<SignInResult>();
-            public LoginModel LoginModel { get; }
+            public LoginDto LoginModel { get; }
 
             [JSInvokable]
             public void ClientLoginComplete(string result)

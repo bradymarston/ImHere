@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ImHere.Services.Models
+namespace ImHere.Services.Dtos
 {
-    public class LoginModel
+    public class LoginDto
     {
         [Required]
         [EmailAddress]

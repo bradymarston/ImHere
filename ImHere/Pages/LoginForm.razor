@@ -1,6 +1,6 @@
 ﻿@page "/loginForm"
 
-@using ImHere.Services.Models
+@using ImHere.Services.Dtos
 @using ImHere.Services
 @using Microsoft.AspNetCore.Identity;
 @inject AccountService _accountService
@@ -43,7 +43,7 @@
 </EditForm>
 
 @code {
-    private LoginModel loginModel = new LoginModel();
+    private LoginDto loginModel = new LoginDto();
     private string errorText = "";
 
 
