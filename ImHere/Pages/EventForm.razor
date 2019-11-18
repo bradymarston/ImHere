@@ -2,12 +2,10 @@
 @page "/eventform/{eventId}"
 
 
-@using ImHere.Data.Models
-@using ShadySoft.EntityPersistence
-@using Data.Repositories
+@using ImHere.Services.Dtos
+@using ImHere.Services
 
-@inject EventRepository _eventRepository
-@inject IUnitOfWork _unitOfWork
+@inject EventService _eventService
 @inject NavigationManager _navigationManager
 
 @if (currentEvent.Id == 0)
@@ -45,18 +43,18 @@
                         <option value="weekly">Weekly</option>
                     </select>
                 </div>
-                @if (currentEvent.Schedule.GetType() == typeof(OneTimeScheduleInfo))
+                @if (currentEvent.Schedule.GetType() == typeof(OneTimeScheduleInfoDto))
                 {
                     <div class="form-group col-md-6">
                         <label for="date">Date</label>
-                        <InputDate id="date" class="form-control" @bind-Value="((OneTimeScheduleInfo)currentEvent.Schedule).Date" />
+                        <InputDate id="date" class="form-control" @bind-Value="((OneTimeScheduleInfoDto)currentEvent.Schedule).Date" />
                     </div>
                 }
-                @if (currentEvent.Schedule.GetType() == typeof(WeeklyScheduleInfo))
+                @if (currentEvent.Schedule.GetType() == typeof(WeeklyScheduleInfoDto))
                 {
                     <div class="form-group col-md-6">
                         <label for="day">Day of Week</label>
-                        <InputSelect id="day" class="form-control" @bind-Value="((WeeklyScheduleInfo)currentEvent.Schedule).Day">
+                        <InputSelect id="day" class="form-control" @bind-Value="((WeeklyScheduleInfoDto)currentEvent.Schedule).Day">
                             @foreach (var day in Enum.GetValues(typeof(DayOfWeek)))
                                 {
                                 <option value="@day">@day</option>
@@ -84,7 +82,7 @@
 </div>
 
 @code {
-    private Event currentEvent = new Event();
+    private EventDto currentEvent = new EventDto();
     private string scheduleType = "once";
 
     [Parameter]
@@ -95,20 +93,26 @@
         int eventId;
 
         if (int.TryParse(EventId, out eventId))
-            currentEvent = await _eventRepository.GetAsync(eventId);
+            currentEvent = await _eventService.GetEventAsync(eventId);
 
         if (currentEvent == null)
-            currentEvent = new Event();
+            currentEvent = new EventDto();
+
+        scheduleType = currentEvent.Schedule switch
+        {
+            WeeklyScheduleInfoDto scheduleInfoDto => "weekly",
+            _ => "once"
+        };
     }
 
     private void ChangeScheduleType(ChangeEventArgs e)
     {
         scheduleType = (string)e.Value;
 
-        EventScheduleInfoBase newSchedule = scheduleType switch
+        EventScheduleInfoDtoBase newSchedule = scheduleType switch
         {
-            "weekly" => new WeeklyScheduleInfo(),
-            _ => new OneTimeScheduleInfo()
+            "weekly" => new WeeklyScheduleInfoDto(),
+            _ => new OneTimeScheduleInfoDto()
         };
 
         if (currentEvent.Schedule.GetType() == newSchedule.GetType())
@@ -124,9 +128,9 @@
     private async Task SubmitAsync(EditContext context)
     {
         if (currentEvent.Id == 0)
-            _eventRepository.Add(currentEvent);
-
-        await _unitOfWork.CompleteAsync();
+            await _eventService.CreateEventAsync(currentEvent);
+        else
+            await _eventService.UpdateEventAsync(currentEvent);
 
         _navigationManager.NavigateTo("events");
     }
