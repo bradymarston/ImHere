@@ -1,0 +1,29 @@
+﻿@page "/studentcheckin/{StudentId:int}"
+
+@using ImHere.Services
+@using ImHere.Services.Dtos
+
+@inject StudentService _studentService
+
+@if (student is null)
+{
+    <h1>Student not found</h1>
+}
+else
+{
+    <h1>Welcome @student.FirstName @student.LastName</h1>
+}
+
+@code {
+    [Parameter]
+    public int StudentId { get; set; }
+
+    private StudentDto student;
+
+    protected async override Task OnParametersSetAsync()
+    {
+        student = await _studentService.GetStudent(StudentId);
+
+        await base.OnParametersSetAsync();
+    }
+}

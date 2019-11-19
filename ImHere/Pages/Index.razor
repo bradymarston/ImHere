@@ -4,31 +4,36 @@
 @using ImHere.Services.Dtos
 
 @inject StudentService _studentService
+@inject NavigationManager _navigationManager
 
 <h1>Select your name below:</h1>
 <div class="row">
-    <div class="col order-1">
+    <div class="col-md-10 col-lg-8 col-xl-6">
+        <div class="row">
+            <div class="col">
+                <p></p>
+                <input class="form-control" type="text" placeholder="Search" @oninput="Refilter" />
+            </div>
+            <div class="col-auto">
+                <p></p>
+                <NavLink href="studentform" class="btn btn-success">
+                    First Time Here?
+                </NavLink>
+            </div>
+        </div>
         <p></p>
-        <input class="form-control" type="text" placeholder="Search" @oninput="Refilter"/>
-    </div>
-    <div class="col-sm-auto order-sm-2 order-0">
-        <p></p>
-        <NavLink href="studentform" class="btn btn-success">
-            First Time Here?
-        </NavLink>
+        <table class="table table-hover" style="cursor: pointer;">
+            <tbody>
+                @foreach (var student in filteredStudents)
+                {
+                    <tr @onclick="@(() => StudentSelected(student))">
+                        <td>@(student.FirstName + " " + student.LastName)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
-<p></p>
-<table class="table table-hover">
-    <tbody>
-        @foreach (var student in filteredStudents)
-        {
-            <tr @onclick="@(() => StudentSelected(student))">
-                <td>@(student.FirstName + " " + student.LastName)</td>
-            </tr>
-        }
-    </tbody>
-</table>
 
 
 @code
@@ -60,7 +65,8 @@
         var searchWords = searchString.Split(" ");
 
 
-        filteredStudents = students.Where(s => {
+        filteredStudents = students.Where(s =>
+        {
             foreach (var word in searchWords)
             {
                 if (!s.FirstName.ToUpper().StartsWith(word.ToUpper()) && !s.LastName.ToUpper().StartsWith(word.ToUpper()))
@@ -72,6 +78,6 @@
 
     private void StudentSelected(StudentDto student)
     {
-        
+        _navigationManager.NavigateTo("/studentcheckin/" + student.Id);
     }
 }
