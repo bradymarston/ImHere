@@ -12,7 +12,7 @@
         <div class="row">
             <div class="col">
                 <p></p>
-                <input class="form-control" type="text" placeholder="Search" @oninput="Refilter" />
+                <input class="form-control" type="text" placeholder="Search" @oninput="Refilter" @onkeypress="KeyPressed" />
             </div>
             <div class="col-auto">
                 <p></p>
@@ -79,5 +79,11 @@
     private void StudentSelected(StudentDto student)
     {
         _navigationManager.NavigateTo("/studentcheckin/" + student.Id);
+    }
+
+    private void KeyPressed(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && filteredStudents.Count() == 1)
+            StudentSelected(filteredStudents.First());
     }
 }
