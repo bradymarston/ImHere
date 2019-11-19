@@ -9,6 +9,6 @@ namespace ImHere.Services.Dtos
     public class EventScheduleInfoDtoBase
     {
         public DateTime StartTime { get; set; }
-        public TimeSpan Duration { get; set; }
+        public double Duration { get; set; }
     }
 }

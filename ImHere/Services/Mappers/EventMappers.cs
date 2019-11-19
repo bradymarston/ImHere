@@ -45,7 +45,7 @@ namespace ImHere.Services.Mappers
             return new OneTimeScheduleInfoDto
             {
                 StartTime = scheduleInfo.StartTime,
-                Duration = scheduleInfo.Duration,
+                Duration = scheduleInfo.Duration.TotalHours,
                 Date = scheduleInfo.Date
             };
         }
@@ -58,7 +58,7 @@ namespace ImHere.Services.Mappers
             return new WeeklyScheduleInfoDto
             {
                 StartTime = scheduleInfo.StartTime,
-                Duration = scheduleInfo.Duration,
+                Duration = scheduleInfo.Duration.TotalHours,
                 Day = scheduleInfo.Day
             };
         }
@@ -92,7 +92,7 @@ namespace ImHere.Services.Mappers
             {
                 EventId = @event.Id,
                 Event = @event,
-                Duration = scheduleInfoDto.Duration,
+                Duration = TimeSpan.FromHours(scheduleInfoDto.Duration),
                 StartTime = scheduleInfoDto.StartTime,
                 Date = scheduleInfoDto.Date
             };
@@ -107,7 +107,7 @@ namespace ImHere.Services.Mappers
             {
                 EventId = @event.Id,
                 Event = @event,
-                Duration = scheduleInfoDto.Duration,
+                Duration = TimeSpan.FromHours(scheduleInfoDto.Duration),
                 StartTime = scheduleInfoDto.StartTime,
                 Day = scheduleInfoDto.Day
             };
@@ -155,7 +155,7 @@ namespace ImHere.Services.Mappers
                 return;
 
             scheduleInfo.StartTime = scheduleInfoDto.StartTime;
-            scheduleInfo.Duration = scheduleInfoDto.Duration;
+            scheduleInfo.Duration = TimeSpan.FromHours(scheduleInfoDto.Duration);
             scheduleInfo.Date = scheduleInfoDto.Date;
         }
 
@@ -165,7 +165,7 @@ namespace ImHere.Services.Mappers
                 return;
 
             scheduleInfo.StartTime = scheduleInfoDto.StartTime;
-            scheduleInfo.Duration = scheduleInfoDto.Duration;
+            scheduleInfo.Duration = TimeSpan.FromHours(scheduleInfoDto.Duration);
             scheduleInfo.Day = scheduleInfoDto.Day;
         }
     }
