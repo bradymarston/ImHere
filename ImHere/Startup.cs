@@ -53,7 +53,9 @@ namespace ImHere
 
             services.AddScoped<AccountService>();
             services.AddScoped<EventService>();
+            services.AddScoped<StudentService>();
             services.AddSingleton<WeatherForecastService>();
+
             services.AddRepository<Event, EventRepository>();
             services.AddDefaultRepository<Student, ApplicationDbContext>();
         }
