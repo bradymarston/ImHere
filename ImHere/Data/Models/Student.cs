@@ -13,7 +13,9 @@ namespace ImHere.Data.Models
         public string FirstName { get; set; }
         [Required]
         public string LastName { get; set; }
+        [Phone]
         public string Phone { get; set; }
+        [EmailAddress]
         public string Email { get; set; }
     }
 }
