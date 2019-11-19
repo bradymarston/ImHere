@@ -21,16 +21,20 @@ namespace ImHere.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task CreateStudentAsync(StudentDto studentDto)
+        public async Task<StudentDto> CreateStudentAsync(StudentDto studentDto)
         {
             if (studentDto is null)
             {
                 throw new ArgumentNullException(nameof(studentDto));
             }
 
-            _studentRepository.Add(studentDto.ToData());
+            var newStudent = studentDto.ToData();
+
+            _studentRepository.Add(newStudent);
 
             await _unitOfWork.CompleteAsync();
+
+            return newStudent.ToDto();
         }
 
         public async Task<IEnumerable<StudentDto>> GetStudents()
