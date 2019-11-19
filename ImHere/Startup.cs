@@ -55,6 +55,7 @@ namespace ImHere
             services.AddScoped<EventService>();
             services.AddSingleton<WeatherForecastService>();
             services.AddRepository<Event, EventRepository>();
+            services.AddDefaultRepository<Student, ApplicationDbContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
