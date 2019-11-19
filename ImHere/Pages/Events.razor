@@ -1,11 +1,63 @@
 ﻿@page "/events"
 
+@using ImHere.Services
+@using ImHere.Services.Dtos
+
+@inject EventService _eventService
+
 <h1>Events</h1>
 
 <NavLink href="/eventForm" class="btn btn-success">
     <span class="oi oi-plus" aria-hidden="true"></span> Add Event
 </NavLink>
+<p></p>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Start Time</th>
+            <th scope="col">Day</th>
+            <th scope="col">
+                <div>Duration</div>
+                <div>(Hours)</div>
+            </th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in events)
+        {
+            <tr>
+                <th scope="row">@e.Name</th>
+                <td>@e.Schedule.StartTime.ToShortTimeString()</td>
+                <td>@GetDayString(e)</td>
+                <td>@e.Schedule.Duration</td>
+                <td>
+                    <NavLink href="@{"/eventForm/" + e.Id}" class="btn btn-primary">
+                        <span class="oi oi-pencil" aria-hidden="true"></span> Edit
+                    </NavLink>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
-@code {
-    
+@code {      
+    private IEnumerable<EventDto> events = new List<EventDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        events = await _eventService.GetEventsAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    private string GetDayString(EventDto @event)
+    {
+        return @event.Schedule switch
+        {
+            OneTimeScheduleInfoDto scheduleInfo => scheduleInfo.Date.ToShortDateString(),
+            WeeklyScheduleInfoDto scheduleInfo => scheduleInfo.Day.ToString()
+        };
+    }
 }
