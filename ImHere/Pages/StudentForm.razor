@@ -1,0 +1,47 @@
+﻿@page "/studentform"
+
+@using ImHere.Services.Dtos
+@using ImHere.Services
+
+@inject StudentService _studentService
+@inject NavigationManager _navigationManager
+
+<div class="row">
+    <div class="col-md-8 col-lg-6 col-xl-4">
+        <EditForm Model="@currentStudent" OnValidSubmit="@SubmitAsync">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label for="first-name">First Name</label>
+                <InputText id="first-name" class="form-control" @bind-Value="@currentStudent.FirstName" placeholder="First Name" />
+            </div>
+            <div class="form-group">
+                <label for="last-name">Last Name</label>
+                <InputText id="last-name" class="form-control" @bind-Value="@currentStudent.LastName" placeholder="Last Name" />
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number (Optional)</label>
+                <InputText id="phone" class="form-control" @bind-Value="@currentStudent.Phone" placeholder="(XXX) XXX-XXXX" />
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <InputText id="email" class="form-control" @bind-Value="@currentStudent.Email" placeholder="youraddress@domain.com" />
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <span><span class="oi oi-plus" aria-hidden="true"></span> Register</span>
+            </button>
+            <NavLink href="" class="btn btn-secondary">
+                Cancel
+            </NavLink>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private StudentDto currentStudent = new StudentDto();
+
+    private async Task SubmitAsync(EditContext context)
+    {
+        await _studentService.CreateStudentAsync(currentStudent);
+        _navigationManager.NavigateTo("/");
+    }
+}
