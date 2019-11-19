@@ -1,5 +1,77 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+@using ImHere.Services
+@using ImHere.Services.Dtos
 
-Welcome to your new app.
+@inject StudentService _studentService
+
+<h1>Select your name below:</h1>
+<div class="row">
+    <div class="col order-1">
+        <p></p>
+        <input class="form-control" type="text" placeholder="Search" @oninput="Refilter"/>
+    </div>
+    <div class="col-sm-auto order-sm-2 order-0">
+        <p></p>
+        <NavLink href="studentform" class="btn btn-success">
+            First Time Here?
+        </NavLink>
+    </div>
+</div>
+<p></p>
+<table class="table table-hover">
+    <tbody>
+        @foreach (var student in filteredStudents)
+        {
+            <tr @onclick="@(() => StudentSelected(student))">
+                <td>@(student.FirstName + " " + student.LastName)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code
+{
+    private IEnumerable<StudentDto> students = new List<StudentDto>();
+    private IEnumerable<StudentDto> filteredStudents = new List<StudentDto>();
+
+    private string searchString = "";
+
+    protected async override Task OnInitializedAsync()
+    {
+        students = (await _studentService.GetStudents()).OrderBy(s => s.FirstName).OrderBy(s => s.LastName);
+        Refilter(null);
+
+        await base.OnInitializedAsync();
+    }
+
+    private void Refilter(ChangeEventArgs e)
+    {
+        if (e != null)
+            searchString = (string)e.Value;
+
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            filteredStudents = students;
+            return;
+        }
+
+        var searchWords = searchString.Split(" ");
+
+
+        filteredStudents = students.Where(s => {
+            foreach (var word in searchWords)
+            {
+                if (!s.FirstName.ToUpper().StartsWith(word.ToUpper()) && !s.LastName.ToUpper().StartsWith(word.ToUpper()))
+                    return false;
+            }
+            return true;
+        });
+    }
+
+    private void StudentSelected(StudentDto student)
+    {
+        
+    }
+}
