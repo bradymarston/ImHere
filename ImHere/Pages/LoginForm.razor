@@ -53,7 +53,7 @@
         var result = await _accountService.LoginAsync(loginModel);
 
         if (result.Succeeded)
-            _navigationManager.NavigateTo("/");
+            _navigationManager.NavigateTo("/events");
 
         if (result.RequiresTwoFactor)
             errorText = "Requires two factor authentication (not supported).";

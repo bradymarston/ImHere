@@ -27,7 +27,7 @@
                 <InputText id="email" class="form-control" @bind-Value="@currentStudent.Email" placeholder="youraddress@domain.com" />
             </div>
             <button type="submit" class="btn btn-primary">
-                <span><span class="oi oi-plus" aria-hidden="true"></span> Register</span>
+                <span><span class="oi oi-check" aria-hidden="true"></span> Register and Check In</span>
             </button>
             <NavLink href="" class="btn btn-secondary">
                 Cancel
@@ -41,7 +41,7 @@
 
     private async Task SubmitAsync(EditContext context)
     {
-        await _studentService.CreateStudentAsync(currentStudent);
-        _navigationManager.NavigateTo("/");
+        var newStudent = await _studentService.CreateStudentAsync(currentStudent);
+        _navigationManager.NavigateTo("/studentcheckin/" + newStudent.Id);
     }
 }
