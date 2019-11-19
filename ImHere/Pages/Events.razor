@@ -33,21 +33,44 @@
                 <td>@GetDayString(e)</td>
                 <td>@e.Schedule.Duration</td>
                 <td>
-                    <NavLink href="@{"/eventForm/" + e.Id}" class="btn btn-primary">
-                        <span class="oi oi-pencil" aria-hidden="true"></span> Edit
-                    </NavLink>
+                    <div style="width: 16rem;">
+                        <NavLink href="@("/eventForm/" + e.Id)" class="btn btn-primary">
+                            <span class="oi oi-pencil" aria-hidden="true"></span> Edit
+                        </NavLink>
+                        <button class="btn btn-danger" @onclick="@(() => RemoveClicked(e.Id))" disabled="@(e.Id == confirmingRemovalId)">
+                            <span class="oi oi-x"></span> Remove
+                        </button>
+                    </div>
+                    @if (e.Id == confirmingRemovalId)
+                    {
+                        <p></p>
+                        <div class="card" style="width: 16rem;">
+                            <div class="card-body">
+                                <p class="card-text">
+                                    Are you sure you want to remove "@(e.Name)"?
+                                </p>
+                                <button class="btn btn-success" @onclick="@(() => RemoveEventAsync(e))">
+                                    <span class="oi oi-check"></span> Confirm
+                                </button>
+                                <button class="btn btn-secondary" @onclick="CancelRemoval">
+                                    <span class="oi oi-x"></span> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    }
                 </td>
             </tr>
         }
     </tbody>
 </table>
 
-@code {      
-    private IEnumerable<EventDto> events = new List<EventDto>();
+@code {
+    private IList<EventDto> events = new List<EventDto>();
+    private int confirmingRemovalId;
 
     protected override async Task OnInitializedAsync()
     {
-        events = await _eventService.GetEventsAsync();
+        events = (await _eventService.GetEventsAsync()).ToList();
 
         await base.OnInitializedAsync();
     }
@@ -59,5 +82,28 @@
             OneTimeScheduleInfoDto scheduleInfo => scheduleInfo.Date.ToShortDateString(),
             WeeklyScheduleInfoDto scheduleInfo => scheduleInfo.Day.ToString()
         };
+    }
+
+    private void RemoveClicked(int eventId)
+    {
+        confirmingRemovalId = eventId;
+    }
+
+    private async Task RemoveEventAsync(EventDto @event)
+    {
+        events.Remove(@event);
+        try
+        {
+            await _eventService.RemoveEvent(@event);
+        }
+        catch
+        {
+            events.Add(@event);
+        }
+    }
+
+    private void CancelRemoval(MouseEventArgs e)
+    {
+        confirmingRemovalId = 0;
     }
 }

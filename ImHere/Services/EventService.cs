@@ -85,5 +85,24 @@ namespace ImHere.Services
 
             await _unitOfWork.CompleteAsync();
         }
+
+        public async Task RemoveEvent(EventDto eventDto)
+        {
+            if (eventDto is null)
+            {
+                throw new ArgumentNullException(nameof(eventDto));
+            }
+
+            var eventInDb = await _eventRepository.GetAsync(eventDto.Id);
+
+            if (eventInDb is null)
+            {
+                throw new KeyNotFoundException("Couldn't find event to remove.");
+            }
+
+            _eventRepository.Remove(eventInDb);
+
+            await _unitOfWork.CompleteAsync();
+        }
     }
 }
