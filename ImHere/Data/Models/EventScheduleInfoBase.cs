@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,8 +15,8 @@ namespace ImHere.Data.Models
         [Required]
         public DateTime StartTime { get; set; }
         [Required]
+        [Column(TypeName = "bigint")]
         public TimeSpan Duration { get; set; }
-
         public abstract bool IsHappening(DateTime testTime);
     }
 }
