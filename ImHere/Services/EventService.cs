@@ -104,5 +104,15 @@ namespace ImHere.Services
 
             await _unitOfWork.CompleteAsync();
         }
+
+        public async Task<IEnumerable<EventDto>> GetHappeningEventsAsync()
+        {
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");            
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneInfo);
+
+            var events = await _eventRepository.GetAsync();
+
+            return events.Where(e => e.Schedule.IsHappening(currentTime)).ToDto();
+        }
     }
 }
