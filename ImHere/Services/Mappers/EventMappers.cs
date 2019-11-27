@@ -42,12 +42,14 @@ namespace ImHere.Services.Mappers
             if (scheduleInfo is null)
                 return null;
 
-            return new OneTimeScheduleInfoDto
+            var scheduleInfoDto = new OneTimeScheduleInfoDto
             {
-                StartTime = scheduleInfo.StartTime,
-                Duration = scheduleInfo.Duration.TotalHours,
                 Date = scheduleInfo.Date
             };
+
+            ToDtoCommon(scheduleInfoDto, scheduleInfo);
+
+            return scheduleInfoDto;
         }
 
         public static EventScheduleInfoDtoBase ToDto(this WeeklyScheduleInfo scheduleInfo)
@@ -55,12 +57,20 @@ namespace ImHere.Services.Mappers
             if (scheduleInfo is null)
                 return null;
 
-            return new WeeklyScheduleInfoDto
+            var scheduleInfoDto = new WeeklyScheduleInfoDto
             {
-                StartTime = scheduleInfo.StartTime,
-                Duration = scheduleInfo.Duration.TotalHours,
                 Day = scheduleInfo.Day
             };
+
+            ToDtoCommon(scheduleInfoDto, scheduleInfo);
+
+            return scheduleInfoDto;
+        }
+
+        private static void ToDtoCommon(EventScheduleInfoDtoBase scheduleInfoDto, EventScheduleInfoBase scheduleInfo)
+        {
+            scheduleInfoDto.StartTime = scheduleInfo.StartTime;
+            scheduleInfoDto.Duration = scheduleInfo.Duration.TotalHours;
         }
 
         public static Event ToData(this EventDto eventDto)
@@ -88,14 +98,14 @@ namespace ImHere.Services.Mappers
             if (scheduleInfoDto is null)
                 return null;
 
-            return new OneTimeScheduleInfo
+            var scheduleInfo = new OneTimeScheduleInfo
             {
-                EventId = @event.Id,
-                Event = @event,
-                Duration = TimeSpan.FromHours(scheduleInfoDto.Duration),
-                StartTime = scheduleInfoDto.StartTime,
                 Date = scheduleInfoDto.Date
             };
+
+            ToDataCommon(scheduleInfo, scheduleInfoDto, @event);
+
+            return scheduleInfo;
         }
 
         public static EventScheduleInfoBase ToData(this WeeklyScheduleInfoDto scheduleInfoDto, Event @event)
@@ -103,21 +113,29 @@ namespace ImHere.Services.Mappers
             if (scheduleInfoDto is null)
                 return null;
 
-            return new WeeklyScheduleInfo
+            var scheduleInfo = new WeeklyScheduleInfo
             {
-                EventId = @event.Id,
-                Event = @event,
-                Duration = TimeSpan.FromHours(scheduleInfoDto.Duration),
-                StartTime = scheduleInfoDto.StartTime,
                 Day = scheduleInfoDto.Day
             };
+
+            ToDataCommon(scheduleInfo, scheduleInfoDto, @event);
+
+            return scheduleInfo;
+        }
+
+        private static void ToDataCommon(EventScheduleInfoBase scheduleInfo, EventScheduleInfoDtoBase scheduleInfoDto, Event @event)
+        {
+            scheduleInfo.EventId = @event.Id;
+            scheduleInfo.Event = @event;
+            scheduleInfo.Duration = TimeSpan.FromHours(scheduleInfoDto.Duration);
+            scheduleInfo.StartTime = scheduleInfoDto.StartTime;
         }
 
         public static void Update(this Event @event, EventDto eventDto, out EventScheduleInfoBase scheduleInfoToRemove)
         {
             scheduleInfoToRemove = null;
 
-            if (@event is null)
+            if (eventDto is null)
                 return;
 
             @event.Name = eventDto.Name;
@@ -151,22 +169,28 @@ namespace ImHere.Services.Mappers
 
         public static void Update(this OneTimeScheduleInfo scheduleInfo, OneTimeScheduleInfoDto scheduleInfoDto)
         {
-            if (scheduleInfo is null)
+            if (scheduleInfoDto is null)
                 return;
 
-            scheduleInfo.StartTime = scheduleInfoDto.StartTime;
-            scheduleInfo.Duration = TimeSpan.FromHours(scheduleInfoDto.Duration);
             scheduleInfo.Date = scheduleInfoDto.Date;
+
+            scheduleInfo.UpdateCommon(scheduleInfoDto);
         }
 
         public static void Update(this WeeklyScheduleInfo scheduleInfo, WeeklyScheduleInfoDto scheduleInfoDto)
         {
-            if (scheduleInfo is null)
+            if (scheduleInfoDto is null)
                 return;
 
+            scheduleInfo.Day = scheduleInfoDto.Day;
+
+            scheduleInfo.UpdateCommon(scheduleInfoDto);
+        }
+
+        private static void UpdateCommon(this EventScheduleInfoBase scheduleInfo, EventScheduleInfoDtoBase scheduleInfoDto)
+        {
             scheduleInfo.StartTime = scheduleInfoDto.StartTime;
             scheduleInfo.Duration = TimeSpan.FromHours(scheduleInfoDto.Duration);
-            scheduleInfo.Day = scheduleInfoDto.Day;
         }
     }
 }
