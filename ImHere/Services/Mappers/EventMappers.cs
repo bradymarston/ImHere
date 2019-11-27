@@ -172,7 +172,7 @@ namespace ImHere.Services.Mappers
             if (scheduleInfoDto is null)
                 return;
 
-            scheduleInfo.StartTime = scheduleInfoDto.StartTime;
+            scheduleInfo.Date = scheduleInfoDto.Date;
 
             scheduleInfo.UpdateCommon(scheduleInfoDto);
         }
