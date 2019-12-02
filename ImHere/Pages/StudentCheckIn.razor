@@ -54,7 +54,10 @@ else
             await _checkInService.CheckInAsync(EventId, StudentId);
         }
         catch
-        { }
+        {
+            _navigationManager.NavigateTo("/checkinfailed");
+            return;
+        }
 
         _navigationManager.NavigateTo("/");
     }
