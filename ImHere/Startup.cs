@@ -57,6 +57,7 @@ namespace ImHere
             services.AddSingleton<WeatherForecastService>();
 
             services.AddRepository<Event, EventRepository>();
+            services.AddRepository<CheckIn, CheckInRepository>();
             services.AddDefaultRepository<Student, ApplicationDbContext>();
         }
 

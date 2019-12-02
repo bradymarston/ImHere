@@ -1,5 +1,6 @@
 ﻿using ImHere.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using ShadySoft.EntityPersistence;
 using System;
 using System.Collections.Generic;
@@ -19,29 +20,35 @@ namespace ImHere.Data.Repositories
         }
         public void Add(Event item)
         {
-            _context.Events.Add(item);
+            _context.Add(item);
         }
 
         public async Task<IEnumerable<Event>> GetAsync()
         {
-            return await _context.Events.Include(DefaultInclusion).ToListAsync();
+            return await _context.Events.AddDefaultInclusions().ToListAsync();
         }
 
         public async Task<Event> GetAsync(int id)
         {
-            return await _context.Events.Include(DefaultInclusion).FirstOrDefaultAsync(e => e.Id == id);
+            return await _context.Events.AddDefaultInclusions().FirstOrDefaultAsync(e => e.Id == id);
         }
 
         public void Remove(Event item)
         {
-            _context.Events.Remove(item);
+            _context.Remove(item);
         }
 
         public void RemoveScheduleInfo(EventScheduleInfoBase scheduleInfo)
         {
             _context.Remove(scheduleInfo);
         }
+    }
 
-        private readonly Expression<Func<Event, EventScheduleInfoBase>> DefaultInclusion = (e) => e.Schedule;
+    public static class EventQueryExtensions
+    {
+        public static IIncludableQueryable<Event, EventScheduleInfoBase> AddDefaultInclusions(this IQueryable<Event> events)
+        {
+            return events.Include(e => e.Schedule);
+        }
     }
 }
