@@ -20,5 +20,13 @@ namespace ImHere.Data.Models
 
             return normalizedTestTime >= compositeStart && normalizedTestTime <= compositeEnd;
         }
+
+        public override DateTime GetStart(DateTime testTime)
+        {
+            if (!IsHappening(testTime))
+                throw new ArgumentOutOfRangeException(nameof(testTime), "The event is not occurring during the provided time.");
+
+            return Date.Date + StartTime.TimeOfDay; 
+        }
     }
 }

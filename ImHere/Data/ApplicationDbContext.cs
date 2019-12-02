@@ -13,6 +13,7 @@ namespace ImHere.Data
         public DbSet<OneTimeScheduleInfo> OneTimeScheduleItems { get; set; }
         public DbSet<WeeklyScheduleInfo> WeeklyScheduleItems { get; set; }
         public DbSet<Student> Students { get; set; }
+        public DbSet<CheckIn> CheckIns { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

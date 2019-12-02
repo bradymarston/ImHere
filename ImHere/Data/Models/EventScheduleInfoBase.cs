@@ -17,6 +17,8 @@ namespace ImHere.Data.Models
         [Required]
         [Column(TypeName = "bigint")]
         public TimeSpan Duration { get; set; }
+
         public abstract bool IsHappening(DateTime testTime);
+        public abstract DateTime GetStart(DateTime testTime);
     }
 }
