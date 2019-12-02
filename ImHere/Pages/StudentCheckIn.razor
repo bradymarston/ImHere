@@ -1,9 +1,12 @@
-﻿@page "/studentcheckin/{StudentId:int}"
+﻿@page "/studentcheckin/{StudentId:int}/{EventId:int}"
 
 @using ImHere.Services
 @using ImHere.Services.Dtos
 
 @inject StudentService _studentService
+@inject EventService  _eventService
+@inject CheckInService  _checkInService
+@inject NavigationManager  _navigationManager
 
 @if (student is null)
 {
@@ -11,25 +14,48 @@
 }
 else
 {
-    <h1>Welcome @student.FirstName @student.LastName</h1>
-    <NavLink href="" class="btn btn-success">
-        <span class="oi oi-check"></span> Finish Check-In
-    </NavLink>
-    <NavLink href="" class="btn btn-secondary">
-        <span class="oi oi-x"></span> Cancel
-    </NavLink>
+    @if (selectedEvent is null)
+    {
+        <h1>Event not found</h1>
+    }
+    else
+    {
+        <h1>Welcome @student.FirstName @student.LastName</h1>
+        <button type="button" class="btn btn-success" @onclick="DoCheckInAsync">
+            <span class="oi oi-check"></span> Finish Check-In to @selectedEvent.Name
+        </button>
+        <NavLink href="" class="btn btn-secondary">
+            <span class="oi oi-x"></span> Cancel
+        </NavLink>
+    }
 }
 
 @code {
     [Parameter]
     public int StudentId { get; set; }
+    [Parameter]
+    public int EventId { get; set; }
 
     private StudentDto student;
+    private EventDto selectedEvent;
 
     protected async override Task OnParametersSetAsync()
     {
-        student = await _studentService.GetStudent(StudentId);
+        student = await _studentService.GetStudentAsync(StudentId);
+        selectedEvent = await _eventService.GetEventAsync(EventId);
 
         await base.OnParametersSetAsync();
+    }
+
+    private async Task DoCheckInAsync()
+    {
+        try
+        {
+            await _checkInService.CheckInAsync(EventId, StudentId);
+        }
+        catch
+        { }
+
+        _navigationManager.NavigateTo("/");
     }
 }

@@ -37,12 +37,12 @@ namespace ImHere.Services
             return newStudent.ToDto();
         }
 
-        public async Task<IEnumerable<StudentDto>> GetStudents()
+        public async Task<IEnumerable<StudentDto>> GetStudentsAsync()
         {
             return (await _studentRepository.GetAsync()).ToDto();
         }
 
-        public async Task<StudentDto> GetStudent(int studentId)
+        public async Task<StudentDto> GetStudentAsync(int studentId)
         {
             return (await _studentRepository.GetAsync(studentId)).ToDto();
         }
@@ -64,7 +64,7 @@ namespace ImHere.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task RemoveStudent(StudentDto studentDto)
+        public async Task RemoveStudentAsync(StudentDto studentDto)
         {
             if (studentDto is null)
             {
