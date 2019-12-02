@@ -34,11 +34,17 @@ namespace ImHere.Data.Repositories
             return await _context.CheckIns.AddDefaultInclusions().SingleOrDefaultAsync(c => c.Id == id);
         }
 
+        public async Task<CheckIn> GetAsync(int eventId, int studentId, DateTime start)
+        {
+            return await _context.CheckIns.AddDefaultInclusions().SingleOrDefaultAsync(c => c.EventId == eventId && c.StudentId == studentId && c.EventStart == start);
+        }
+
         public void Remove(CheckIn item)
         {
             _context.Remove(item);
         }
     }
+
     public static class CheckInQueryExtensions
     {
         public static IIncludableQueryable<CheckIn, Student> AddDefaultInclusions(this IQueryable<CheckIn> checkIns)

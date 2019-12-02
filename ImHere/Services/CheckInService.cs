@@ -32,22 +32,26 @@ namespace ImHere.Services
             var student = await _studentRepository.GetAsync(studentId);
             if (student is null)
                 throw new KeyNotFoundException("Couldn't find student to check in.");
-            
+
             var currentUtcTime = DateTime.UtcNow;
             var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
             var currentCentralTime = TimeZoneInfo.ConvertTimeFromUtc(currentUtcTime, timeZoneInfo);
 
             var eventStartTime = @event.Schedule.GetStart(currentCentralTime);
 
-            _checkInRepository.Add(new CheckIn
-            {
-                Event = @event,
-                EventId = @event.Id,
-                Student = student,
-                StudentId = student.Id,
-                EventStart = eventStartTime,
-                TimeStamp = currentUtcTime
-            });
+            if ((await _checkInRepository.GetAsync(eventId, studentId, eventStartTime)) != null)
+                throw new InvalidOperationException("Student cannot check in twice to the same event.");
+
+            _checkInRepository.Add(
+                new CheckIn
+                {
+                    Event = @event,
+                    EventId = @event.Id,
+                    Student = student,
+                    StudentId = student.Id,
+                    EventStart = eventStartTime,
+                    TimeStamp = currentUtcTime
+                });
 
             await _unitOfWork.CompleteAsync();
         }
