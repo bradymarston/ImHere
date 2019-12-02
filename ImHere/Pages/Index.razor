@@ -7,35 +7,35 @@
 @inject EventService _eventService
 @inject NavigationManager _navigationManager
 
-@if (events.Count() == 0)
-{
-    <h3>No currently active event available for check-in.</h3>
-}
-else
-{
-    @if (events.Count() == 1)
-    {
-        <h3>Welcome to @events.First().Name</h3>
-    }
-    else
-    {
-        <h3>Select an event to check-in:</h3>
-        <p></p>
-        <select class="form-control" @onchange="@(e => ChangeCurrentEvent((string)e.Value))">
-            <option value="0"></option>
-            @foreach (var e in events)
+<div class="row">
+    <div class="col-md-10 col-lg-8 col-xl-6">
+        @if (events.Count() == 0)
+        {
+            <h3>No currently active event available for check-in.</h3>
+        }
+        else
+        {
+            @if (events.Count() == 1)
             {
-                <option value="@e.Id">@e.Name</option>
+                <h3>Welcome to @events.First().Name</h3>
             }
-        </select>
-        <p></p>
-    }
+            else
+            {
+                <h3>Select an event to check-in:</h3>
+                <p></p>
+                <select class="form-control" @onchange="@(e => ChangeCurrentEvent((string)e.Value))">
+                    <option value="0"></option>
+                    @foreach (var e in events)
+                    {
+                        <option value="@e.Id">@e.Name</option>
+                    }
+                </select>
+                <p></p>
+            }
 
-    @if (currentEvent.Id != 0)
-    {
-        <h3>Select your name below:</h3>
-        <div class="row">
-            <div class="col-md-10 col-lg-8 col-xl-6">
+            @if (currentEvent.Id != 0)
+            {
+                <h3>Select your name below:</h3>
                 <div class="row sticky-top bg-white">
                     <div class="col pr-0">
                         <p></p>
@@ -59,82 +59,81 @@ else
                         }
                     </tbody>
                 </table>
-            </div>
-        </div>
-    }
-}
-
+            }
+        }
+    </div>
+</div>
 
 
 @code
 {
-    private IEnumerable<StudentDto> students = new List<StudentDto>();
-    private IEnumerable<StudentDto> filteredStudents = new List<StudentDto>();
-    private IEnumerable<EventDto> events = new List<EventDto>();
-    private EventDto currentEvent = new EventDto();
+        private IEnumerable<StudentDto> students = new List<StudentDto>();
+        private IEnumerable<StudentDto> filteredStudents = new List<StudentDto>();
+        private IEnumerable<EventDto> events = new List<EventDto>();
+        private EventDto currentEvent = new EventDto();
 
-    private string searchString = "";
+        private string searchString = "";
 
-    protected async override Task OnInitializedAsync()
-    {
-        events = await _eventService.GetHappeningEventsAsync();
-        if (events.Count() == 1)
-            currentEvent = events.First();
-
-        students = (await _studentService.GetStudents()).OrderBy(s => s.FirstName).OrderBy(s => s.LastName);
-        Refilter(null);
-
-        await base.OnInitializedAsync();
-    }
-
-    private void Refilter(ChangeEventArgs e)
-    {
-        if (e != null)
-            searchString = (string)e.Value;
-
-        if (string.IsNullOrWhiteSpace(searchString))
+        protected async override Task OnInitializedAsync()
         {
-            filteredStudents = students;
-            return;
+            events = await _eventService.GetHappeningEventsAsync();
+            if (events.Count() == 1)
+                currentEvent = events.First();
+
+            students = (await _studentService.GetStudents()).OrderBy(s => s.FirstName).OrderBy(s => s.LastName);
+            Refilter(null);
+
+            await base.OnInitializedAsync();
         }
 
-        var searchWords = searchString.Split(" ");
-
-
-        filteredStudents = students.Where(s =>
+        private void Refilter(ChangeEventArgs e)
         {
-            foreach (var word in searchWords)
+            if (e != null)
+                searchString = (string)e.Value;
+
+            if (string.IsNullOrWhiteSpace(searchString))
             {
-                if (!s.FirstName.ToUpper().StartsWith(word.ToUpper()) && !s.LastName.ToUpper().StartsWith(word.ToUpper()))
-                    return false;
-            }
-            return true;
-        });
-    }
-
-    private void StudentSelected(StudentDto student)
-    {
-        _navigationManager.NavigateTo("/studentcheckin/" + student.Id);
-    }
-
-    private void KeyPressed(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter" && filteredStudents.Count() == 1)
-            StudentSelected(filteredStudents.First());
-    }
-
-    private void ChangeCurrentEvent(string eventId)
-    {
-        if (eventId == "0")
-            currentEvent = new EventDto();
-        else
-        {
-            var selectedEvent = events.SingleOrDefault(e => e.Id.ToString() == eventId);
-
-            if (selectedEvent is null)
+                filteredStudents = students;
                 return;
+            }
 
-            currentEvent = selectedEvent;
+            var searchWords = searchString.Split(" ");
+
+
+            filteredStudents = students.Where(s =>
+            {
+                foreach (var word in searchWords)
+                {
+                    if (!s.FirstName.ToUpper().StartsWith(word.ToUpper()) && !s.LastName.ToUpper().StartsWith(word.ToUpper()))
+                        return false;
+                }
+                return true;
+            });
+        }
+
+        private void StudentSelected(StudentDto student)
+        {
+            _navigationManager.NavigateTo("/studentcheckin/" + student.Id);
+        }
+
+        private void KeyPressed(KeyboardEventArgs e)
+        {
+            if (e.Key == "Enter" && filteredStudents.Count() == 1)
+                StudentSelected(filteredStudents.First());
+        }
+
+        private void ChangeCurrentEvent(string eventId)
+        {
+            if (eventId == "0")
+                currentEvent = new EventDto();
+            else
+            {
+                var selectedEvent = events.SingleOrDefault(e => e.Id.ToString() == eventId);
+
+                if (selectedEvent is null)
+                    return;
+
+                currentEvent = selectedEvent;
+            }
         }
     }
-}
