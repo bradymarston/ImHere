@@ -114,5 +114,18 @@ namespace ImHere.Services
 
             return events.Where(e => e.Schedule.IsHappening(currentTime)).ToDto();
         }
+
+        public async Task<DateTime> GetCurrentStartTimeAsync(int eventId)
+        {
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneInfo);
+
+            var eventInDb = await _eventRepository.GetAsync(eventId);
+
+            if (eventInDb is null)
+                throw new KeyNotFoundException("Couldn't find event to get start time.");
+
+            return eventInDb.Schedule.GetStart(currentTime);
+        }
     }
 }

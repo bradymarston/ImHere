@@ -17,5 +17,6 @@ namespace ImHere.Data.Models
         public string Phone { get; set; }
         [EmailAddress]
         public string Email { get; set; }
+        public IEnumerable<CheckIn> CheckIns { get; set; } = new List<CheckIn>();
     }
 }

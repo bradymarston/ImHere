@@ -1,4 +1,5 @@
 ﻿using ImHere.Data.Models;
+using ImHere.Data.Repositories;
 using ImHere.Services.Dtos;
 using ImHere.Services.Mappers;
 using ShadySoft.EntityPersistence;
@@ -12,10 +13,10 @@ namespace ImHere.Services
 {
     public class StudentService
     {
-        private readonly IRepository<Student> _studentRepository;
+        private readonly StudentRepository _studentRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public StudentService(IRepository<Student> studentRepository, IUnitOfWork unitOfWork)
+        public StudentService(StudentRepository studentRepository, IUnitOfWork unitOfWork)
         {
             _studentRepository = studentRepository;
             _unitOfWork = unitOfWork;
@@ -45,6 +46,11 @@ namespace ImHere.Services
         public async Task<StudentDto> GetStudentAsync(int studentId)
         {
             return (await _studentRepository.GetAsync(studentId)).ToDto();
+        }
+
+        public async Task<IEnumerable<StudentDto>> GetStudentsNotCheckedInAsync(int eventId, DateTime start)
+        {
+            return (await _studentRepository.GetNotCheckedInAsync(eventId, start)).ToDto();
         }
 
         public async Task UpdateStudent(StudentDto studentDto)

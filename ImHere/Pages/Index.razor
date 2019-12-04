@@ -90,6 +90,8 @@
                     return;
 
                 currentEvent = selectedEvent;
+
+                LoadStudentsAsync();
             }
         }
     }
@@ -105,19 +107,25 @@
     protected async override Task OnInitializedAsync()
     {
         events = await _eventService.GetHappeningEventsAsync();
+
         if (events.Count() == 1)
             currentEvent = events.First();
 
         if (LoadEventId > 0)
             if (events.Any(e => e.Id == LoadEventId))
-            {
                 SelectedEventId = LoadEventId.ToString();
-            }
-
-        students = (await _studentService.GetStudentsAsync()).OrderBy(s => s.FirstName).OrderBy(s => s.LastName);
-        Refilter(null);
 
         await base.OnInitializedAsync();
+    }
+
+    private async void LoadStudentsAsync()
+    {
+        var eventStart = await _eventService.GetCurrentStartTimeAsync(currentEvent.Id);
+
+        students = (await _studentService.GetStudentsNotCheckedInAsync(currentEvent.Id, eventStart)).OrderBy(s => s.FirstName).OrderBy(s => s.LastName);
+        Refilter(null);
+
+        StateHasChanged();
     }
 
     private void Refilter(ChangeEventArgs e)
