@@ -1,4 +1,5 @@
 ﻿@page "/"
+@page "/index/{LoadEventId:int}"
 
 @using ImHere.Services
 @using ImHere.Services.Dtos
@@ -23,8 +24,7 @@
             {
                 <h3>Select an event to check-in:</h3>
                 <p></p>
-                <select class="form-control" @onchange="@(e => ChangeCurrentEvent((string)e.Value))">
-                    <option value="0"></option>
+                <select class="form-control" @bind="SelectedEventId">
                     @foreach (var e in events)
                     {
                         <option value="@e.Id">@e.Name</option>
@@ -67,6 +67,34 @@
 
 @code
 {
+    [Parameter]
+    public int LoadEventId { get; set; }
+
+    public string SelectedEventId
+    {
+        get
+        {
+            return _selectedEventId;
+        }
+        set
+        {
+            _selectedEventId = value;
+
+            if (value == "0")
+                currentEvent = new EventDto();
+            else
+            {
+                var selectedEvent = events.SingleOrDefault(e => e.Id.ToString() == value);
+
+                if (selectedEvent is null)
+                    return;
+
+                currentEvent = selectedEvent;
+            }
+        }
+    }
+
+    private string _selectedEventId = "0";
     private IEnumerable<StudentDto> students = new List<StudentDto>();
     private IEnumerable<StudentDto> filteredStudents = new List<StudentDto>();
     private IEnumerable<EventDto> events = new List<EventDto>();
@@ -79,6 +107,12 @@
         events = await _eventService.GetHappeningEventsAsync();
         if (events.Count() == 1)
             currentEvent = events.First();
+
+        if (LoadEventId > 0)
+            if (events.Any(e => e.Id == LoadEventId))
+            {
+                SelectedEventId = LoadEventId.ToString();
+            }
 
         students = (await _studentService.GetStudentsAsync()).OrderBy(s => s.FirstName).OrderBy(s => s.LastName);
         Refilter(null);
@@ -121,19 +155,4 @@
         if (e.Key == "Enter" && filteredStudents.Count() == 1)
             StudentSelected(filteredStudents.First());
     }
-
-    private void ChangeCurrentEvent(string eventId)
-    {
-        if (eventId == "0")
-            currentEvent = new EventDto();
-        else
-        {
-            var selectedEvent = events.SingleOrDefault(e => e.Id.ToString() == eventId);
-
-            if (selectedEvent is null)
-                return;
-
-            currentEvent = selectedEvent;
-        }
-    }
-    }
+}
