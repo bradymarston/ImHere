@@ -29,6 +29,16 @@ namespace ImHere.Data.Repositories
             return await _context.CheckIns.AddDefaultInclusions().ToListAsync();
         }
 
+        public async Task<IEnumerable<CheckIn>> GetAsync(Expression<Func<CheckIn, bool>> predicate, bool includeChildren = true)
+        {
+            var query = _context.CheckIns.Where(predicate);
+
+            if (includeChildren)
+                query = query.AddDefaultInclusions();
+
+            return await query.ToListAsync();
+        }
+
         public async Task<CheckIn> GetAsync(int id)
         {
             return await _context.CheckIns.AddDefaultInclusions().SingleOrDefaultAsync(c => c.Id == id);

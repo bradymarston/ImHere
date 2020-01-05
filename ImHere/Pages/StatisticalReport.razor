@@ -1,0 +1,58 @@
+﻿@page "/statisticalreports"
+
+@using ImHere.Services
+@inject ReportingService _reportingService
+
+<h3>Statistical Report</h3>
+
+<div class="form-row col-md-11 col-lg-8 col-xl-6">
+    <div class="form-group col-sm-6">
+        <label for="start-date">Start Date</label>
+        <input type="date" id="start-date" class="form-control" @bind-value="start" />
+    </div>
+    <div class="form-group col-sm-6">
+        <label for="end-date">End Date</label>
+        <input type="date" id="end-date" class="form-control" @bind-value="end" />
+    </div>
+</div>
+
+<p>
+    <button class="btn btn-primary" @onclick="GenerateReportAsync">
+        Update Report
+    </button>
+</p>
+
+<p>
+    Unique Students: @UniqueStudentCount
+</p>
+<p>
+    Attendance Total: @CheckInCount
+</p>
+
+@code {
+    public int CheckInCount { get; set; }
+    public int UniqueStudentCount { get; set; }
+
+    private DateTime start = new DateTime(2019, 1, 1);
+    private DateTime end = new DateTime(2020, 12, 31);
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var schoolStartYear = DateTime.UtcNow.Month > 7 ? DateTime.UtcNow.Year : DateTime.UtcNow.Year - 1;
+
+        start = new DateTime(schoolStartYear, 8, 1);
+        end = start + TimeSpan.FromDays(365);
+
+        await GenerateReportAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GenerateReportAsync()
+    {
+        var normalizedEnd = end + TimeSpan.FromDays(1);
+        CheckInCount = await _reportingService.GetCheckInCountAsync(start, normalizedEnd);
+        UniqueStudentCount = await _reportingService.GetUniqueStudentCountAsync(start, normalizedEnd);
+    }
+}
