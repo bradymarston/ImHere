@@ -55,6 +55,7 @@ namespace ImHere
             services.AddScoped<EventService>();
             services.AddScoped<StudentService>();
             services.AddScoped<CheckInService>();
+            services.AddScoped<ReportingService>();
             services.AddSingleton<WeatherForecastService>();
 
             services.AddRepository<Event, EventRepository>();

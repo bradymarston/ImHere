@@ -1,0 +1,77 @@
+﻿@page "/checkinreports"
+
+@using ImHere.Services
+@using ImHere.Services.Dtos
+@inject ReportingService _reportingService
+
+<h3>Event Report - Overall</h3>
+
+<div class="row">
+    <div class="col-md-11 col-lg-8 col-xl-6">
+        <table class="table table-borderless">
+            <thead class="thead-light">
+                <tr>
+                    <th style="width: 0.1%; white-space: nowrap;"></th>
+                    <th scope="col">Event Name</th>
+                    <th scope="col">Date</th>
+                    <th scope="col"># Checked In</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Events)
+                {
+                    <tr @onclick="() => EventClicked(e)">
+                        <td>
+                            <span class=@(e == SelectedEvent ? "oi oi-chevron-top" : "oi oi-chevron-bottom") aria-hidden="true"></span>
+                        </td>
+                        <th scope="row">@e.Name</th>
+                        <td>@e.InstanceStart.ToShortDateString()</td>
+                        <td>@e.CheckIns.Count()</td>
+                    </tr>
+                    @if (e == SelectedEvent)
+                    {
+                        <tr>
+                            <td></td>
+                            <td colspan="3">
+                                <table class="table">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col">Attendee Name</th>
+                                            <th scope="col">Check-In Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var c in e.CheckIns)
+                                        {
+                                            <tr>
+                                                <th scope="row">@(c.Student.FirstName + " " + c.Student.LastName)</th>
+                                                <td>@c.TimeStamp.ToShortTimeString()</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    public IEnumerable<EventInstanceDto> Events = new List<EventInstanceDto>();
+    public EventInstanceDto SelectedEvent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Events = await _reportingService.GetEventInstancesAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    private void EventClicked(EventInstanceDto @event)
+    {
+        SelectedEvent = SelectedEvent == @event ? null : @event;
+    }
+}
