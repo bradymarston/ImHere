@@ -9,6 +9,7 @@ namespace ImHere.Services.Dtos
     public class StudentDto
     {
         public int Id { get; set; }
+        public int StudentTypeId { get; set; }
         [Required]
         public string FirstName { get; set; }
         [Required]
@@ -17,5 +18,6 @@ namespace ImHere.Services.Dtos
         public string Phone { get; set; }
         [EmailAddress]
         public string Email { get; set; }
+        public string StudentTypeDescription { get; set; }
     }
 }

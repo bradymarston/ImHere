@@ -17,10 +17,12 @@ namespace ImHere.Services.Mappers
             return new StudentDto
             {
                 Id = student.Id,
+                StudentTypeId = student.StudentTypeId,
                 FirstName = student.FirstName,
                 LastName = student.LastName,
                 Phone = student.Phone,
-                Email = student.Email
+                Email = student.Email,
+                StudentTypeDescription = student?.StudentType.Description
             };
         }
 
