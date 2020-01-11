@@ -50,7 +50,7 @@ namespace ImHere.Services
                     Student = student,
                     StudentId = student.Id,
                     EventStart = eventStartTime,
-                    TimeStamp = currentUtcTime
+                    TimeStamp = currentCentralTime
                 });
 
             await _unitOfWork.CompleteAsync();
