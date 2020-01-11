@@ -14,6 +14,7 @@ namespace ImHere.Data
         public DbSet<WeeklyScheduleInfo> WeeklyScheduleItems { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<CheckIn> CheckIns { get; set; }
+        public DbSet<StudentType> StudentTypes { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

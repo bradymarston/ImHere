@@ -4,14 +4,16 @@ using ImHere.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ImHere.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200111185341_SeedStudentTypes")]
+    partial class SeedStudentTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,12 +116,7 @@ namespace ImHere.Data.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StudentTypeId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("StudentTypeId");
 
                     b.ToTable("Students");
                 });
@@ -379,15 +376,6 @@ namespace ImHere.Data.Migrations
                     b.HasOne("ImHere.Data.Models.Event", "Event")
                         .WithOne("Schedule")
                         .HasForeignKey("ImHere.Data.Models.EventScheduleInfoBase", "EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ImHere.Data.Models.Student", b =>
-                {
-                    b.HasOne("ImHere.Data.Models.StudentType", "StudentType")
-                        .WithMany("Students")
-                        .HasForeignKey("StudentTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

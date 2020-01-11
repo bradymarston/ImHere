@@ -9,6 +9,8 @@ namespace ImHere.Data.Models
     public class Student
     {
         public int Id { get; set; }
+        public int StudentTypeId { get; set; }
+        public StudentType StudentType { get; set; }
         [Required]
         public string FirstName { get; set; }
         [Required]
