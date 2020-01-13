@@ -18,7 +18,7 @@
         {
             @if (events.Count() == 1)
             {
-                <h3>Welcome to @events.First().Name</h3>
+                <h1>Welcome to @events.First().Name</h1>
             }
             else
             {
@@ -43,7 +43,7 @@
                     </div>
                     <div class="col-auto">
                         <p></p>
-                        <NavLink href="studentform" class="btn btn-success">
+                        <NavLink href="@($"newstudent/{SelectedEventId}")" class="btn btn-success">
                             First Time Here?
                         </NavLink>
                     </div>
@@ -55,6 +55,7 @@
                         {
                             <tr @onclick="@(() => StudentSelected(student))">
                                 <td>@(student.FirstName + " " + student.LastName)</td>
+                                <td class="text-right text-muted">@student.StudentTypeDescription</td>
                             </tr>
                         }
                     </tbody>
