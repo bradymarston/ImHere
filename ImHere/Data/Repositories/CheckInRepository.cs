@@ -57,9 +57,9 @@ namespace ImHere.Data.Repositories
 
     public static class CheckInQueryExtensions
     {
-        public static IIncludableQueryable<CheckIn, Student> AddDefaultInclusions(this IQueryable<CheckIn> checkIns)
+        public static IIncludableQueryable<CheckIn, StudentType> AddDefaultInclusions(this IQueryable<CheckIn> checkIns)
         {
-            return checkIns.Include(c => c.Event).ThenInclude(e => e.Schedule).Include(c => c.Student);
+            return checkIns.Include(c => c.Event).ThenInclude(e => e.Schedule).Include(c => c.Student).ThenInclude(s => s.StudentType);
         }
     }
 }
