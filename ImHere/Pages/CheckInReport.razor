@@ -1,4 +1,5 @@
 ﻿@page "/checkinreports"
+@attribute [Authorize]
 
 @using ImHere.Services
 @using ImHere.Services.Dtos
@@ -20,49 +21,49 @@
             <tbody>
                 @foreach (var e in Events)
                 {
-                    <tr @onclick="() => EventClicked(e)">
-                        <td>
-                            <span class=@(e == SelectedEvent ? "oi oi-chevron-top" : "oi oi-chevron-bottom") aria-hidden="true"></span>
-                        </td>
-                        <th scope="row">@e.Name</th>
-                        <td>@e.InstanceStart.ToShortDateString()</td>
-                        <td>@e.CheckIns.Count()</td>
-                    </tr>
-                    @if (e == SelectedEvent)
+                <tr @onclick="() => EventClicked(e)">
+                    <td>
+                        <span class=@(e == SelectedEvent ? "oi oi-chevron-top" : "oi oi-chevron-bottom") aria-hidden="true"></span>
+                    </td>
+                    <th scope="row">@e.Name</th>
+                    <td>@e.InstanceStart.ToShortDateString()</td>
+                    <td>@e.CheckIns.Count()</td>
+                </tr>
+                @if (e == SelectedEvent)
                     {
-                        <tr>
-                            <td></td>
-                            <td colspan="3">
-                                @foreach (var count in GetCountsByType(SelectedEvent))
+                <tr>
+                    <td></td>
+                    <td colspan="3">
+                        @foreach (var count in GetCountsByType(SelectedEvent))
                                 {
-                                    <div>@($"{count.Key} count: {count.Value}")</div>
+                        <div>@($"{count.Key} count: {count.Value}")</div>
                                 }
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td colspan="3">
-                                <table class="table">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th scope="col">Attendee Name</th>
-                                            <th></th>
-                                            <th scope="col">Check-In Time</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var c in e.CheckIns)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td colspan="3">
+                        <table class="table">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th scope="col">Attendee Name</th>
+                                    <th></th>
+                                    <th scope="col">Check-In Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var c in e.CheckIns)
                                         {
-                                            <tr>
-                                                <th scope="row">@(c.Student.FirstName + " " + c.Student.LastName)</th>
-                                                <td class="text-right">@c.Student.StudentTypeDescription</td>
-                                                <td class="text-right">@c.TimeStamp.ToShortTimeString()</td>
-                                            </tr>
+                                <tr>
+                                    <th scope="row">@(c.Student.FirstName + " " + c.Student.LastName)</th>
+                                    <td class="text-right">@c.Student.StudentTypeDescription</td>
+                                    <td class="text-right">@c.TimeStamp.ToShortTimeString()</td>
+                                </tr>
                                         }
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
                     }
                 }
             </tbody>
