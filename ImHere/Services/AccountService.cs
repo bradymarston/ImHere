@@ -53,6 +53,16 @@ namespace ImHere.Services
             return callback.ResultSource.Task;
         }
 
+        public async Task<IdentityResult> CreateUserAsync(string userName, string password)
+        {
+            var user = new IdentityUser()
+            {
+                UserName = userName
+            };
+
+            return await _userManager.CreateAsync(user, password);
+        }
+
         private async Task FinishServerLoginAsync(LoginDto loginModel)
         {
             var user = await _userManager.FindByNameAsync(loginModel.UserName);

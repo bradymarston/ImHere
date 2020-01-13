@@ -1,0 +1,22 @@
+﻿@page "/seedadmin"
+
+<h3>@resultText</h3>
+
+@using ImHere.Services
+@inject AccountService _accountService
+
+@code {
+    private string resultText = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await _accountService.CreateUserAsync("admin", "admin");
+
+        if (result.Succeeded)
+            resultText = "Created admin user.";
+        else
+            resultText = "Did not create admin user.";
+
+        await base.OnInitializedAsync();
+    }
+}
