@@ -33,10 +33,20 @@
                         <tr>
                             <td></td>
                             <td colspan="3">
+                                @foreach (var count in GetCountsByType(SelectedEvent))
+                                {
+                                    <div>@($"{count.Key} count: {count.Value}")</div>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td colspan="3">
                                 <table class="table">
                                     <thead class="thead-light">
                                         <tr>
                                             <th scope="col">Attendee Name</th>
+                                            <th></th>
                                             <th scope="col">Check-In Time</th>
                                         </tr>
                                     </thead>
@@ -45,7 +55,8 @@
                                         {
                                             <tr>
                                                 <th scope="row">@(c.Student.FirstName + " " + c.Student.LastName)</th>
-                                                <td>@c.TimeStamp.ToShortTimeString()</td>
+                                                <td class="text-right">@c.Student.StudentTypeDescription</td>
+                                                <td class="text-right">@c.TimeStamp.ToShortTimeString()</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -73,5 +84,12 @@
     private void EventClicked(EventInstanceDto @event)
     {
         SelectedEvent = SelectedEvent == @event ? null : @event;
+    }
+
+    private IDictionary<string, int> GetCountsByType(EventInstanceDto testEvent)
+    {
+        var counts = testEvent.CheckIns.GroupBy(c => c.Student.StudentTypeId).ToDictionary(g => g.First().Student.StudentTypeDescription, g => g.Count());
+
+        return counts;
     }
 }
