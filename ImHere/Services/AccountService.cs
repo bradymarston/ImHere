@@ -63,6 +63,13 @@ namespace ImHere.Services
             return await _userManager.CreateAsync(user, password);
         }
 
+        public async Task<IdentityResult> ChangePasswordAsync(ChangePasswordDto passwords)
+        {
+            var user = await _userManager.FindByNameAsync(_signInManager.Context.User.Identity.Name);
+
+            return await _userManager.ChangePasswordAsync(user, passwords.CurrentPassword, passwords.NewPassword);
+        }
+
         private async Task FinishServerLoginAsync(LoginDto loginModel)
         {
             var user = await _userManager.FindByNameAsync(loginModel.UserName);
