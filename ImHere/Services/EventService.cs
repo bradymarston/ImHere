@@ -139,5 +139,24 @@ namespace ImHere.Services
         {
             return await _eventRepository.GetEventIdsWithCheckIns();
         }
+
+        public async Task SetSuspensionStateAsync(EventDto eventDto, bool suspended)
+        {
+            if (eventDto is null)
+            {
+                throw new ArgumentNullException(nameof(eventDto));
+            }
+
+            var eventInDb = await _eventRepository.GetAsync(eventDto.Id);
+
+            if (eventInDb is null)
+            {
+                throw new KeyNotFoundException("Couldn't find event to remove.");
+            }
+
+            eventInDb.Suspended = suspended;
+
+            await _unitOfWork.CompleteAsync();
+        }
     }
 }
