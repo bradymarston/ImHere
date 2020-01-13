@@ -12,5 +12,6 @@ namespace ImHere.Data.Models
         [Required]
         public string Name { get; set; }
         public EventScheduleInfoBase Schedule { get; set; } = new OneTimeScheduleInfo();
+        public bool Suspended { get; set; }
     }
 }

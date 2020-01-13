@@ -14,5 +14,6 @@ namespace ImHere.Services.Dtos
         public string Name { get; set; }
 
         public EventScheduleInfoDtoBase Schedule { get; set; } = new OneTimeScheduleInfoDto();
+        public bool Suspended { get; set; }
     }
 }

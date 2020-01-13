@@ -110,7 +110,7 @@ namespace ImHere.Services
             var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");            
             var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneInfo);
 
-            var events = await _eventRepository.GetAsync();
+            var events = (await _eventRepository.GetAsync()).Where(e => !e.Suspended);
 
             return events.Where(e => e.Schedule.IsHappening(currentTime)).ToDto();
         }

@@ -18,6 +18,7 @@ namespace ImHere.Services.Mappers
             {
                 Id = @event.Id,
                 Name = @event.Name,
+                Suspended = @event.Suspended
             };
 
             eventDto.Schedule = @event.Schedule switch
@@ -81,7 +82,8 @@ namespace ImHere.Services.Mappers
             var @event = new Event
             {
                 Id = eventDto.Id,
-                Name = eventDto.Name
+                Name = eventDto.Name,
+                Suspended = eventDto.Suspended
             };
 
             @event.Schedule = eventDto.Schedule switch
