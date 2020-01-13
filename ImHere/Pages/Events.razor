@@ -35,10 +35,10 @@
     <tbody>
         @foreach (var e in ApplyEventFilters(events))
         {
-            <tr>
+            <tr class="@(e.Suspended ? "text-muted" : "") @(e.Suspended || _eventService.IsExpired(e) ? "bg-light" : "")">
                 <th scope="row">@e.Name</th>
-                <td>@e.Schedule.StartTime.ToShortTimeString()</td>
-                <td>@GetDayString(e)</td>
+                <td class="@(_eventService.IsExpired(e) ? "text-danger" : "")">@e.Schedule.StartTime.ToShortTimeString()</td>
+                <td class="@(_eventService.IsExpired(e) ? "text-danger" : "")">@GetDayString(e)</td>
                 <td>@e.Schedule.Duration</td>
                 <td>
                     <div style="width: 19rem;">
