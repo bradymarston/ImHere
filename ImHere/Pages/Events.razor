@@ -15,6 +15,9 @@
 <button class="@($"btn btn-secondary{(showSuspended ? " active" : "")}")" @onclick="() => showSuspended = !showSuspended">
     @(showSuspended ? "Hide" : "Show") Suspended Events
 </button>
+<button class="@($"btn btn-secondary{(showPast ? " active" : "")}")" @onclick="() => showPast = !showPast">
+    @(showPast ? "Hide" : "Show") Past Events
+</button>
 <p></p>
 <table class="table table-hover">
     <thead>
@@ -125,6 +128,9 @@
 
         if (!showSuspended)
             returnEvents = returnEvents.Where(e => !e.Suspended).ToList();
+
+        if (!showPast)
+            returnEvents = returnEvents.Where(e => !_eventService.IsExpired(e)).ToList();
 
         return returnEvents;
     }

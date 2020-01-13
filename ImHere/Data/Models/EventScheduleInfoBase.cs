@@ -19,6 +19,7 @@ namespace ImHere.Data.Models
         public TimeSpan Duration { get; set; }
 
         public abstract bool IsHappening(DateTime testTime);
+        public abstract bool IsExpired(DateTime testTime);
         public abstract DateTime GetStart(DateTime testTime);
     }
 }

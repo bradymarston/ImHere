@@ -28,5 +28,10 @@ namespace ImHere.Data.Models
 
             return Date.Date + StartTime.TimeOfDay; 
         }
+
+        public override bool IsExpired(DateTime testTime)
+        {
+            return testTime > Date.Date + StartTime.TimeOfDay + Duration;
+        }
     }
 }

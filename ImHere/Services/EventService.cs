@@ -135,6 +135,14 @@ namespace ImHere.Services
             return eventInDb.Schedule.GetStart(currentTime);
         }
 
+        public bool IsExpired(EventDto eventDto)
+        {
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+            var currentTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneInfo);
+
+            return eventDto.ToData().Schedule.IsExpired(currentTime);
+        }
+
         public async Task<IEnumerable<int>> GetEventIdsWithCheckIns()
         {
             return await _eventRepository.GetEventIdsWithCheckIns();
