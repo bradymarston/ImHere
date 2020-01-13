@@ -77,7 +77,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Events = await _reportingService.GetEventInstancesAsync();
+        Events = (await _reportingService.GetEventInstancesAsync()).OrderByDescending(e => e.InstanceStart);
 
         await base.OnInitializedAsync();
     }
