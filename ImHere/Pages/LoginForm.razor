@@ -53,15 +53,15 @@
         var result = await _accountService.LoginAsync(loginModel);
 
         if (result.Succeeded)
-            _navigationManager.NavigateTo("/events");
+            return;
 
         if (result.RequiresTwoFactor)
             errorText = "Requires two factor authentication (not supported).";
         else
-            if (result.IsLockedOut)
+        if (result.IsLockedOut)
             errorText = "Account locked out. Please try again later.";
         else
-                if (result.IsNotAllowed)
+            if (result.IsNotAllowed)
             errorText = "Account not confirmed.";
         else
             errorText = "Invalid login attempt.";

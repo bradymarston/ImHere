@@ -8,15 +8,20 @@
 @inject EventService _eventService
 @inject NavigationManager _navigationManager
 
-<div class="row">
-    <div class="col-md-10 col-lg-8 col-xl-6">
-        @if (events.Count() == 0)
+<AuthorizeView>
+    <Authorized>
+        Redirecting...
+    </Authorized>
+    <NotAuthorized>
+        <div class="row">
+            <div class="col-md-10 col-lg-8 col-xl-6">
+                @if (events.Count() == 0)
         {
-            <h3>No currently active event available for check-in.</h3>
+                <h3>No currently active event available for check-in.</h3>
         }
         else
         {
-            @if (events.Count() == 1)
+                @if (events.Count() == 1)
             {
                 <h1>Welcome to @events.First().Name</h1>
             }
@@ -27,13 +32,13 @@
                 <select class="form-control" @bind="SelectedEventId">
                     @foreach (var e in events)
                     {
-                        <option value="@e.Id">@e.Name</option>
+                    <option value="@e.Id">@e.Name</option>
                     }
                 </select>
                 <p></p>
             }
 
-            @if (currentEvent.Id != 0)
+                @if (currentEvent.Id != 0)
             {
                 <h3>Select your name below:</h3>
                 <div class="row sticky-top bg-white">
@@ -53,23 +58,27 @@
                     <tbody>
                         @foreach (var student in filteredStudents)
                         {
-                            <tr @onclick="@(() => StudentSelected(student))">
-                                <td>@(student.FirstName + " " + student.LastName)</td>
-                                <td class="text-right text-muted">@student.StudentTypeDescription</td>
-                            </tr>
+                        <tr @onclick="@(() => StudentSelected(student))">
+                            <td>@(student.FirstName + " " + student.LastName)</td>
+                            <td class="text-right text-muted">@student.StudentTypeDescription</td>
+                        </tr>
                         }
                     </tbody>
                 </table>
             }
         }
-    </div>
-</div>
-
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code
 {
     [Parameter]
     public int LoadEventId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     public string SelectedEventId
     {
@@ -107,6 +116,14 @@
 
     protected async override Task OnInitializedAsync()
     {
+        var authState = await authenticationStateTask;
+
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            _navigationManager.NavigateTo("events");
+            return;
+        }
+
         events = await _eventService.GetHappeningEventsAsync();
 
         if (events.Count() == 1)

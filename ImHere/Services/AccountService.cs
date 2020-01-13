@@ -1,5 +1,6 @@
 ﻿using ImHere.Services.Dtos;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +23,7 @@ namespace ImHere.Services
         private readonly IHostEnvironmentAuthenticationStateProvider _hostAuthenticationStateProvider;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly NavigationManager _navigationManager;
         private const int loginExpirationSeconds = 5;
 
         public AccountService(
@@ -30,7 +32,8 @@ namespace ImHere.Services
             AuthenticationStateProvider authenticationStateProvider,
             IHostEnvironmentAuthenticationStateProvider hostAuthenticationStateProvider,
             UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            SignInManager<IdentityUser> signInManager,
+            NavigationManager navigationManager)
         {
             _jSRuntime = jSRuntime;
             _dataProtectionProvider = dataProtectionProvider;
@@ -38,6 +41,7 @@ namespace ImHere.Services
             _hostAuthenticationStateProvider = hostAuthenticationStateProvider;
             _userManager = userManager;
             _signInManager = signInManager;
+            _navigationManager = navigationManager;
         }
 
         public Task<SignInResult> LoginAsync(LoginDto loginModel)
@@ -82,6 +86,7 @@ namespace ImHere.Services
             principal = new ClaimsPrincipal(identity);
             _signInManager.Context.User = principal;
             _hostAuthenticationStateProvider.SetAuthenticationState(Task.FromResult(new AuthenticationState(principal)));
+            _navigationManager.NavigateTo("");
         }
 
         public class LoginCallback
