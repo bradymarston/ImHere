@@ -9,7 +9,7 @@ namespace ImHere.Services.Dtos
     public class StudentDto
     {
         public int Id { get; set; }
-        public int StudentTypeId { get; set; }
+        public int StudentTypeId { get; set; } = 1;
         [Required]
         public string FirstName { get; set; }
         [Required]

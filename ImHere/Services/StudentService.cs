@@ -14,11 +14,13 @@ namespace ImHere.Services
     public class StudentService
     {
         private readonly StudentRepository _studentRepository;
+        private readonly IRepository<StudentType> _studentTypeRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public StudentService(StudentRepository studentRepository, IUnitOfWork unitOfWork)
+        public StudentService(StudentRepository studentRepository, IRepository<StudentType> studentTypeRepository, IUnitOfWork unitOfWork)
         {
             _studentRepository = studentRepository;
+            _studentTypeRepository = studentTypeRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -85,6 +87,11 @@ namespace ImHere.Services
             _studentRepository.Remove(studentInDb);
 
             await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task<IEnumerable<StudentType>> GetStudentTypesAsync()
+        {
+            return await _studentTypeRepository.GetAsync();
         }
     }
 }

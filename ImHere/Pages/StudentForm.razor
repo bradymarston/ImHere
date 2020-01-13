@@ -1,13 +1,17 @@
 ﻿@page "/studentform"
+@page "/newstudent/{EventId:int}"
 
 @using ImHere.Services.Dtos
 @using ImHere.Services
+@using ImHere.Data.Models
 
 @inject StudentService _studentService
 @inject NavigationManager _navigationManager
 
 <div class="row">
     <div class="col-md-8 col-lg-6 col-xl-4">
+        <h3>New Attendee</h3>
+        <p>Please enter your name. If you'd like us to be able to contact you, please provide your phone number, email address, or both.</p>
         <EditForm Model="@currentStudent" OnValidSubmit="@SubmitAsync">
             <DataAnnotationsValidator />
             <div class="form-group">
@@ -18,13 +22,27 @@
                 <label for="last-name">Last Name</label>
                 <InputText id="last-name" class="form-control" @bind-Value="@currentStudent.LastName" placeholder="Last Name" />
             </div>
-            <div class="form-group">
-                <label for="phone">Phone Number (Optional)</label>
-                <InputText id="phone" class="form-control" @bind-Value="@currentStudent.Phone" placeholder="(XXX) XXX-XXXX" />
-            </div>
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <InputText id="email" class="form-control" @bind-Value="@currentStudent.Email" placeholder="youraddress@domain.com" />
+            <p class="ml-3">
+                @foreach (var st in studentTypes)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(currentStudent.StudentTypeId == st.Id)" @onchange="() => currentStudent.StudentTypeId = st.Id">
+                        <label class="form-check-label" for="@($"studentType{st.Id}")">
+                            @st.Description
+                        </label>
+                    </div>
+                }
+            </p>
+            <p>How would you like us to be able to contact you?</p>
+            <div class="ml-3">
+                <div class="form-group">
+                    <label for="phone">Phone Number (Optional)</label>
+                    <InputText id="phone" class="form-control" @bind-Value="@currentStudent.Phone" placeholder="(XXX) XXX-XXXX" />
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address (Optional)</label>
+                    <InputText id="email" class="form-control" @bind-Value="@currentStudent.Email" placeholder="youraddress@domain.com" />
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">
                 <span><span class="oi oi-check" aria-hidden="true"></span> Register and Check In</span>
@@ -38,10 +56,24 @@
 
 @code {
     private StudentDto currentStudent = new StudentDto();
+    private IEnumerable<StudentType> studentTypes = new List<StudentType>();
+
+    [Parameter]
+    public int EventId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        studentTypes = await _studentService.GetStudentTypesAsync();
+        
+        await base.OnInitializedAsync();
+    }
 
     private async Task SubmitAsync(EditContext context)
     {
         var newStudent = await _studentService.CreateStudentAsync(currentStudent);
-        _navigationManager.NavigateTo("/studentcheckin/" + newStudent.Id);
+        if (EventId > 0)
+            _navigationManager.NavigateTo($"/studentcheckin/{newStudent.Id}/{EventId}");
+        else
+            _navigationManager.NavigateTo("/");
     }
 }

@@ -39,6 +39,7 @@ namespace ImHere.Services.Mappers
             return new Student
             {
                 Id = studentDto.Id,
+                StudentTypeId = studentDto.StudentTypeId,
                 FirstName = studentDto.FirstName,
                 LastName = studentDto.LastName,
                 Phone = studentDto.Phone,
@@ -55,6 +56,7 @@ namespace ImHere.Services.Mappers
             student.LastName = studentDto.LastName;
             student.Phone = studentDto.Phone;
             student.Email = studentDto.Email;
+            student.StudentTypeId = studentDto.StudentTypeId;
         }
     }
 }
