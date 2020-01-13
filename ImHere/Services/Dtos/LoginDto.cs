@@ -9,8 +9,7 @@ namespace ImHere.Services.Dtos
     public class LoginDto
     {
         [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        public string UserName { get; set; }
 
         [Required]
         [DataType(DataType.Password)]

@@ -55,7 +55,7 @@ namespace ImHere.Services
 
         private async Task FinishServerLoginAsync(LoginDto loginModel)
         {
-            var user = await _userManager.FindByNameAsync(loginModel.Email);
+            var user = await _userManager.FindByNameAsync(loginModel.UserName);
             var principal = await _signInManager.CreateUserPrincipalAsync(user);
 
             var identity = new ClaimsIdentity(
