@@ -38,9 +38,12 @@
                         <NavLink href="@("/eventForm/" + e.Id)" class="btn btn-primary">
                             <span class="oi oi-pencil" aria-hidden="true"></span> Edit
                         </NavLink>
-                        <button class="btn btn-danger" @onclick="@(() => RemoveClicked(e.Id))" disabled="@(e.Id == confirmingRemovalId)">
-                            <span class="oi oi-x"></span> Remove
-                        </button>
+                        @if (!eventIdsWithCheckIns.Contains(e.Id))
+                        {
+                            <button class="btn btn-danger" @onclick="@(() => RemoveClicked(e.Id))" disabled="@(e.Id == confirmingRemovalId)">
+                                <span class="oi oi-x"></span> Remove
+                            </button>
+                        }
                     </div>
                     @if (e.Id == confirmingRemovalId)
                     {
@@ -67,11 +70,13 @@
 
 @code {
     private IList<EventDto> events = new List<EventDto>();
+    private IEnumerable<int> eventIdsWithCheckIns = new List<int>();
     private int confirmingRemovalId;
 
     protected override async Task OnInitializedAsync()
     {
         events = (await _eventService.GetEventsAsync()).ToList();
+        eventIdsWithCheckIns = await _eventService.GetEventIdsWithCheckIns();
 
         await base.OnInitializedAsync();
     }
@@ -100,6 +105,8 @@
         catch
         {
             events.Add(@event);
+            confirmingRemovalId = 0;
+            eventIdsWithCheckIns = await _eventService.GetEventIdsWithCheckIns();
         }
     }
 

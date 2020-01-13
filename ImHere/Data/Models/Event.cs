@@ -13,5 +13,6 @@ namespace ImHere.Data.Models
         public string Name { get; set; }
         public EventScheduleInfoBase Schedule { get; set; } = new OneTimeScheduleInfo();
         public bool Suspended { get; set; }
+        public IEnumerable<CheckIn> CheckIns { get; set; } = new List<CheckIn>();
     }
 }

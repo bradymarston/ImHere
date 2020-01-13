@@ -100,9 +100,16 @@ namespace ImHere.Services
                 throw new KeyNotFoundException("Couldn't find event to remove.");
             }
 
+            var eventIdsWithCheckIns = await _eventRepository.GetEventIdsWithCheckIns();
+
+            if (eventIdsWithCheckIns.Contains(eventDto.Id))
+            {
+                throw new InvalidOperationException("Cannot delete an event with check-ins.");
+            }
+
             _eventRepository.Remove(eventInDb);
 
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.CompleteAsync(true);
         }
 
         public async Task<IEnumerable<EventDto>> GetHappeningEventsAsync()
@@ -126,6 +133,11 @@ namespace ImHere.Services
                 throw new KeyNotFoundException("Couldn't find event to get start time.");
 
             return eventInDb.Schedule.GetStart(currentTime);
+        }
+
+        public async Task<IEnumerable<int>> GetEventIdsWithCheckIns()
+        {
+            return await _eventRepository.GetEventIdsWithCheckIns();
         }
     }
 }

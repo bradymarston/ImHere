@@ -42,6 +42,11 @@ namespace ImHere.Data.Repositories
         {
             _context.Remove(scheduleInfo);
         }
+
+        public async Task<IEnumerable<int>> GetEventIdsWithCheckIns()
+        {
+            return await _context.Events.Where(e => e.CheckIns.Count() != 0).Select(e => e.Id).ToListAsync();
+        }
     }
 
     public static class EventQueryExtensions

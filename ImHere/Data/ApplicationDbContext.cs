@@ -20,5 +20,12 @@ namespace ImHere.Data
             : base(options)
         {
         }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<Event>().HasMany(e => e.CheckIns).WithOne(c => c.Event).OnDelete(DeleteBehavior.SetNull);
+            
+            base.OnModelCreating(builder);
+        }
     }
 }

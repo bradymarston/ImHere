@@ -11,12 +11,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.0-preview1.19508.20" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.0-preview1.19506.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.0-preview1.19506.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="ShadySoft.EntityPersistence">
-      <HintPath>..\..\ShadySoft.EntityPersistence\ShadySoft.EntityPersistence\bin\Release\netcoreapp3.0\ShadySoft.EntityPersistence.dll</HintPath>
-    </Reference>
+    <PackageReference Include ="ShadySoft.EntityPersistence" Version="1.1.0" />
   </ItemGroup>
 
 </Project>
