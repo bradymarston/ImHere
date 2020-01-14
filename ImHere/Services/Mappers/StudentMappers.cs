@@ -42,7 +42,7 @@ namespace ImHere.Services.Mappers
                 StudentTypeId = studentDto.StudentTypeId,
                 FirstName = studentDto.FirstName,
                 LastName = studentDto.LastName,
-                Phone = studentDto.Phone,
+                Phone = NormalizePhoneNumber(studentDto.Phone),
                 Email = studentDto.Email
             };
         }
@@ -54,9 +54,22 @@ namespace ImHere.Services.Mappers
 
             student.FirstName = studentDto.FirstName;
             student.LastName = studentDto.LastName;
-            student.Phone = studentDto.Phone;
+            student.Phone = NormalizePhoneNumber(studentDto.Phone);
             student.Email = studentDto.Email;
             student.StudentTypeId = studentDto.StudentTypeId;
+        }
+
+
+        private static string NormalizePhoneNumber(string phoneNumber)
+        {
+            var phoneDigits = new string(phoneNumber.Where(c => c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9').ToArray());
+
+            return phoneDigits.Length switch
+            {
+                10 => $"({phoneDigits.Substring(0, 3)}) {phoneDigits.Substring(3, 3)}-{phoneDigits.Substring(6, 4)}",
+                7 => $"{phoneDigits.Substring(0, 3)}-{phoneDigits.Substring(3, 4)}",
+                _ => phoneNumber
+            };
         }
     }
 }
