@@ -69,7 +69,8 @@ namespace ImHere.Services
 
         public async Task<IdentityResult> ChangePasswordAsync(ChangePasswordDto passwords)
         {
-            var user = await _userManager.FindByNameAsync(_signInManager.Context.User.Identity.Name);
+            var userName = (await _authenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+            var user = await _userManager.FindByNameAsync(userName);
 
             return await _userManager.ChangePasswordAsync(user, passwords.CurrentPassword, passwords.NewPassword);
         }
