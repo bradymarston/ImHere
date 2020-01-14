@@ -1,5 +1,7 @@
 ﻿@page "/seedadmin"
 
+@inject NavigationManager  _navigationManager
+
 <h3>@resultText</h3>
 
 @using ImHere.Services
@@ -13,7 +15,7 @@
         var result = await _accountService.CreateUserAsync("admin", "admin");
 
         if (result.Succeeded)
-            resultText = "Created admin user.";
+            _navigationManager.NavigateTo("/login");
         else
             resultText = "Did not create admin user.";
 
