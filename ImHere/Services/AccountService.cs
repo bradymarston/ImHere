@@ -87,7 +87,6 @@ namespace ImHere.Services
             principal = new ClaimsPrincipal(identity);
             _signInManager.Context.User = principal;
             _hostAuthenticationStateProvider.SetAuthenticationState(Task.FromResult(new AuthenticationState(principal)));
-            _navigationManager.NavigateTo("");
         }
 
         public class LoginCallback
