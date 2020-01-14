@@ -1,0 +1,14 @@
+﻿@page "/updatedatabase"
+
+@using ImHere.Data
+@using  Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext _dbContext
+<h3>Update Database</h3>
+
+<button class="btn btn-primary" @onclick="() => _dbContext.Database.Migrate()">
+    Update Database
+</button>
+
+@code {
+
+}

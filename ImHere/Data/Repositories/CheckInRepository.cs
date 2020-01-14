@@ -26,6 +26,7 @@ namespace ImHere.Data.Repositories
 
         public async Task<IEnumerable<CheckIn>> GetAsync()
         {
+            _context.Database.Migrate();
             return await _context.CheckIns.AddDefaultInclusions().ToListAsync();
         }
 
