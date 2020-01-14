@@ -37,8 +37,7 @@ namespace ImHere
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddPersistence<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlite("Filename=ImHere.db"));
             services.AddDefaultIdentity<IdentityUser>(options => 
             {
                 options.Password.RequiredLength = 4;
