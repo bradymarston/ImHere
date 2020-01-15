@@ -10,17 +10,29 @@
 
 <div class="row">
     <div class="col-md-8 col-lg-6 col-xl-4">
-        <h3>New Attendee</h3>
-        <p>Please enter your name. If you'd like us to be able to contact you, please provide your phone number, email address, or both.</p>
+        @if (EditingStudentId == 0)
+        {
+            <h1>New Attendee</h1>
+            <p>Please enter your name. If you'd like us to be able to contact you, please provide your phone number, email address, or both.</p>
+        } else
+        {
+            <h1>Editing Attendee</h1>
+        }
         <EditForm Model="@currentStudent" OnValidSubmit="@SubmitAsync">
             <DataAnnotationsValidator />
             <div class="form-group">
                 <label for="first-name">First Name</label>
                 <InputText id="first-name" class="form-control" @bind-Value="@currentStudent.FirstName" placeholder="First Name" />
+                <small class="form-text">
+                    <ValidationMessage For="@(() => currentStudent.FirstName)" />
+                </small>
             </div>
             <div class="form-group">
                 <label for="last-name">Last Name</label>
                 <InputText id="last-name" class="form-control" @bind-Value="@currentStudent.LastName" placeholder="Last Name" />
+                <small class="form-text">
+                    <ValidationMessage For="@(() => currentStudent.LastName)" />
+                </small>
             </div>
             <p class="ml-3">
                 @foreach (var st in studentTypes)
@@ -33,15 +45,27 @@
                     </div>
                 }
             </p>
-            <p>How would you like us to be able to contact you?</p>
+            @if (EditingStudentId == 0)
+            {
+                <p>How would you like us to be able to contact you?</p>
+            } else
+            {
+                <p>Contact Info:</p>
+            }
             <div class="ml-3">
                 <div class="form-group">
                     <label for="phone">Phone Number (Optional)</label>
                     <InputText id="phone" class="form-control" @bind-Value="@currentStudent.Phone" placeholder="(XXX) XXX-XXXX" />
+                    <small class="form-text">
+                        <ValidationMessage For="@(() => currentStudent.Phone)" />
+                    </small>
                 </div>
                 <div class="form-group">
                     <label for="email">Email Address (Optional)</label>
                     <InputText id="email" class="form-control" @bind-Value="@currentStudent.Email" placeholder="youraddress@domain.com" />
+                    <small class="form-text">
+                        <ValidationMessage For="@(() => currentStudent.Email)" />
+                    </small>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">

@@ -24,16 +24,24 @@
             <div class="form-group">
                 <label for="event-name">Event Name</label>
                 <InputText id="event-name" class="form-control" @bind-Value="@currentEvent.Name" placeholder="New Event" />
+                <small class="form-text">
+                    <ValidationMessage For="@(() => currentEvent.Name)" />
+                </small>
             </div>
             <div class="form-row">
                 <div class="form-group col-sm-6">
                     <label for="start-time">Start Time</label>
                     <InputTime id="start-time" class="form-control" @bind-Value="@currentEvent.Schedule.StartTime" />
-                    <ValidationMessage For="@(() => currentEvent.Schedule.StartTime)" />
+                    <small class="form-text">
+                        <ValidationMessage For="@(() => currentEvent.Schedule.StartTime)" />
+                    </small>
                 </div>
                 <div class="form-group col-sm-6">
                     <label for="duration">Duration (in hours)</label>
                     <InputNumber id="duration" class="form-control" @bind-Value="@currentEvent.Schedule.Duration" />
+                    <small class="form-text">
+                        <ValidationMessage For="@(() => currentEvent.Schedule.Duration)" />
+                    </small>
                 </div>
             </div>
             <div class="form-row">
@@ -49,6 +57,9 @@
                     <div class="form-group col-md-6">
                         <label for="date">Date</label>
                         <InputDate id="date" class="form-control" @bind-Value="((OneTimeScheduleInfoDto)currentEvent.Schedule).Date" />
+                        <small class="form-text">
+                            <ValidationMessage For="@(() => ((OneTimeScheduleInfoDto)currentEvent.Schedule).Date)" />
+                        </small>
                     </div>
                 }
                 @if (currentEvent.Schedule.GetType() == typeof(WeeklyScheduleInfoDto))

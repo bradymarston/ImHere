@@ -3,7 +3,7 @@
 @using ImHere.Data
 @using  Microsoft.EntityFrameworkCore
 @inject ApplicationDbContext _dbContext
-<h3>Update Database</h3>
+<h1>Update Database</h1>
 
 <button class="btn btn-primary" @onclick="() => _dbContext.Database.Migrate()">
     Update Database

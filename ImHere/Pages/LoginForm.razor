@@ -18,7 +18,9 @@
                    class="form-control"
                    id="userName"
                    placeholder="User Name" />
-        <ValidationMessage For="@(() => loginModel.UserName)" />
+        <small class="form-text">
+            <ValidationMessage For="@(() => loginModel.UserName)" />
+        </small>
     </div>
     <div class="form-group">
         <label for="password">Password</label>
@@ -27,7 +29,9 @@
                    class="form-control"
                    id="password"
                    placeholder="Password" />
-        <ValidationMessage For="@(() => loginModel.Password)" />
+        <small class="form-text">
+            <ValidationMessage For="@(() => loginModel.Password)" />
+        </small>
     </div>
     <div class="form-group form-check">
         <InputCheckbox @bind-Value="@loginModel.RememberMe" 
