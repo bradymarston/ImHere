@@ -16,12 +16,14 @@ namespace ImHere.Services
         private readonly StudentRepository _studentRepository;
         private readonly IRepository<StudentType> _studentTypeRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly CheckInRepository _checkInRepository;
 
-        public StudentService(StudentRepository studentRepository, IRepository<StudentType> studentTypeRepository, IUnitOfWork unitOfWork)
+        public StudentService(StudentRepository studentRepository, IRepository<StudentType> studentTypeRepository, IUnitOfWork unitOfWork, CheckInRepository checkInRepository)
         {
             _studentRepository = studentRepository;
             _studentTypeRepository = studentTypeRepository;
             _unitOfWork = unitOfWork;
+            _checkInRepository = checkInRepository;
         }
 
         public async Task<StudentDto> CreateStudentAsync(StudentDto studentDto)
@@ -72,17 +74,17 @@ namespace ImHere.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task RemoveStudentAsync(StudentDto studentDto)
+        public async Task RemoveStudentAsync(int studentId)
         {
-            if (studentDto is null)
-            {
-                throw new ArgumentNullException(nameof(studentDto));
-            }
-
-            var studentInDb = await _studentRepository.GetAsync(studentDto.Id);
+            var studentInDb = await _studentRepository.GetAsync(studentId);
 
             if (studentInDb is null)
                 throw new KeyNotFoundException("Couldn't find a student to delete.");
+
+            var studentCheckIns = await _checkInRepository.GetAsync(c => c.StudentId == studentId, false);
+
+            if (studentCheckIns.Count() > 0)
+                throw new InvalidOperationException("Cannot delete student with check-ins.");
 
             _studentRepository.Remove(studentInDb);
 

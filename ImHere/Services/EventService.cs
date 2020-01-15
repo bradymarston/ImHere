@@ -14,11 +14,13 @@ namespace ImHere.Services
     {
         private readonly EventRepository _eventRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly CheckInRepository _checkInRepository;
 
-        public EventService(EventRepository eventRepository, IUnitOfWork unitOfWork)
+        public EventService(EventRepository eventRepository, IUnitOfWork unitOfWork, CheckInRepository checkInRepository)
         {
             _eventRepository = eventRepository;
             _unitOfWork = unitOfWork;
+            _checkInRepository = checkInRepository;
         }
 
         public async Task<IEnumerable<EventDto>> GetEventsAsync()
@@ -100,9 +102,9 @@ namespace ImHere.Services
                 throw new KeyNotFoundException("Couldn't find event to remove.");
             }
 
-            var eventIdsWithCheckIns = await _eventRepository.GetEventIdsWithCheckIns();
+            var eventCheckIns = await _checkInRepository.GetAsync(c => c.EventId == eventDto.Id, false);
 
-            if (eventIdsWithCheckIns.Contains(eventDto.Id))
+            if (eventCheckIns.Count() > 0)
             {
                 throw new InvalidOperationException("Cannot delete an event with check-ins.");
             }
