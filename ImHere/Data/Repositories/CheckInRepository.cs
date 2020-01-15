@@ -50,6 +50,16 @@ namespace ImHere.Data.Repositories
             return await _context.CheckIns.AddDefaultInclusions().SingleOrDefaultAsync(c => c.EventId == eventId && c.StudentId == studentId && c.EventStart == start);
         }
 
+        public async Task<IDictionary<string, int>> GetCheckInCountsAsync(Expression<Func<CheckIn, bool>> predicate)
+        {
+            return (await _context.CheckIns.AddDefaultInclusions().Where(predicate).ToListAsync()).GroupBy(c => c.Student.StudentType.Description).ToDictionary(g => g.Key, g => g.Count());
+        }
+
+        public async Task<IDictionary<string, int>> GetUniqueStudentCountsAsync(Expression<Func<CheckIn, bool>> predicate)
+        {
+            return (await _context.CheckIns.AddDefaultInclusions().Where(predicate).ToListAsync()).GroupBy(c => c.Student.StudentType.Description).ToDictionary(g => g.Key, g => g.GroupBy(c => c.Student).Count());
+        }
+
         public void Remove(CheckIn item)
         {
             _context.Remove(item);

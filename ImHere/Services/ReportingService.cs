@@ -1,6 +1,7 @@
 ﻿using ImHere.Data.Repositories;
 using ImHere.Services.Dtos;
 using ImHere.Services.Mappers;
+using ImHere.Services.Rptos;
 using ShadySoft.EntityPersistence;
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,12 @@ namespace ImHere.Services
     public class ReportingService
     {
         private readonly CheckInRepository _checkInRepository;
+        private readonly StudentRepository _studentRepository;
 
-        public ReportingService(CheckInRepository checkInService)
+        public ReportingService(CheckInRepository checkInService, StudentRepository studentRepository)
         {
             _checkInRepository = checkInService;
+            _studentRepository = studentRepository;
         }
 
         public async Task<IEnumerable<EventInstanceDto>> GetEventInstancesAsync()
@@ -26,18 +29,19 @@ namespace ImHere.Services
             return checkIns.ToEventInstanceDto();
         }
 
-        public async Task<int> GetCheckInCountAsync(DateTime start, DateTime end)
+        public async Task<IDictionary<string, int>> GetCheckInCountsAsync(DateTime start, DateTime end)
         {
-            var checkIns = await _checkInRepository.GetAsync(c => c.TimeStamp >= start && c.TimeStamp <= end, false);
-
-            return checkIns.Count();
+            return await _checkInRepository.GetCheckInCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end);
         }
 
-        public async Task<int> GetUniqueStudentCountAsync(DateTime start, DateTime end)
+        public async Task<IDictionary<string, int>> GetUniqueStudentCountsAsync(DateTime start, DateTime end)
         {
-            var checkIns = await _checkInRepository.GetAsync(c => c.TimeStamp >= start && c.TimeStamp <= end, false);
+            return await _checkInRepository.GetUniqueStudentCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end);
+        }
 
-            return checkIns.GroupBy(c => c.StudentId).Count();
+        public async Task<IEnumerable<StudentOverviewRpto>> GetStudentOverviewReportDataAsync(DateTime start, DateTime end)
+        {
+            return await _studentRepository.GetStudentReportDataAsync(start, end);
         }
     }
 }

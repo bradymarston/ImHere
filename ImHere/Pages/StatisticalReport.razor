@@ -4,46 +4,89 @@
 @using ImHere.Services
 @inject ReportingService _reportingService
 
-<h3>Statistical Report</h3>
+<h1>Statistical Report</h1>
 
 <div class="form-row col-md-11 col-lg-8 col-xl-6">
     <div class="form-group col-sm-6">
         <label for="start-date">Start Date</label>
-        <input type="date" id="start-date" class="form-control" @bind-value="start" />
+        <input type="date" id="start-date" class="form-control" @bind-value="Start" />
     </div>
     <div class="form-group col-sm-6">
         <label for="end-date">End Date</label>
-        <input type="date" id="end-date" class="form-control" @bind-value="end" />
+        <input type="date" id="end-date" class="form-control" @bind-value="End" />
+    </div>
+
+    <div>
+        <button class="btn btn-primary" @onclick="GenerateReportAsync">
+            Update Report
+        </button>
+    </div>
+</div>
+<p />
+<div class="form-row col-md-11 col-lg-8 col-xl-6">
+    <div class="text-right">
+        <p>
+            <strong>Unique Attendees: @UniqueStudentCounts.Sum(c => c.Value)</strong>
+            @foreach (var count in UniqueStudentCounts)
+            {
+                <div>@($"{count.Key}: {count.Value}")</div>
+            }
+        </p>
+        <p>
+            <strong>Attendance Total: @CheckInCounts.Sum(c => c.Value)</strong>
+            @foreach (var count in CheckInCounts)
+            {
+                <div>@($"{count.Key}: {count.Value}")</div>
+            }
+        </p>
     </div>
 </div>
 
-<p>
-    <button class="btn btn-primary" @onclick="GenerateReportAsync">
-        Update Report
-    </button>
-</p>
-
-<p>
-    Unique Students: @UniqueStudentCount
-</p>
-<p>
-    Attendance Total: @CheckInCount
-</p>
+<h4>Excel Reports: (right-click to save)</h4>
+<a href="@("api/report/student-list" + urlDateRangeSegment)">Student Report</a>
 
 @code {
-    public int CheckInCount { get; set; }
-    public int UniqueStudentCount { get; set; }
+    public IDictionary<string, int> CheckInCounts { get; set; }
+    public IDictionary<string, int> UniqueStudentCounts { get; set; }
 
-    private DateTime start = new DateTime(2019, 1, 1);
-    private DateTime end = new DateTime(2020, 12, 31);
+    private string urlDateRangeSegment = "";
+
+    private DateTime _start = new DateTime(2019, 1, 1);
+    private DateTime _end = new DateTime(2020, 12, 31);
+
+    public DateTime Start
+    {
+        get
+        {
+            return _start;
+        }
+        set
+        {
+            _start = value;
+            UpdateUrls();
+        }
+    }
+
+    public DateTime End
+    {
+        get
+        {
+            return _end;
+        }
+        set
+        {
+            _end = value;
+            UpdateUrls();
+        }
+    }
 
 
     protected override async Task OnInitializedAsync()
     {
         var schoolStartYear = DateTime.UtcNow.Month > 7 ? DateTime.UtcNow.Year : DateTime.UtcNow.Year - 1;
 
-        start = new DateTime(schoolStartYear, 8, 1);
-        end = start + TimeSpan.FromDays(365);
+        Start = new DateTime(schoolStartYear, 8, 1);
+        End = Start + TimeSpan.FromDays(365);
 
         await GenerateReportAsync();
 
@@ -52,8 +95,13 @@
 
     private async Task GenerateReportAsync()
     {
-        var normalizedEnd = end + TimeSpan.FromDays(1);
-        CheckInCount = await _reportingService.GetCheckInCountAsync(start, normalizedEnd);
-        UniqueStudentCount = await _reportingService.GetUniqueStudentCountAsync(start, normalizedEnd);
+        var normalizedEnd = End + TimeSpan.FromDays(1);
+        CheckInCounts = await _reportingService.GetCheckInCountsAsync(Start, normalizedEnd);
+        UniqueStudentCounts = await _reportingService.GetUniqueStudentCountsAsync(Start, normalizedEnd);
+    }
+
+    private void UpdateUrls()
+    {
+        urlDateRangeSegment = $"/{Start.Month}-{Start.Day}-{Start.Year}/{End.Month}-{End.Day}-{End.Year}";
     }
 }

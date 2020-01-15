@@ -1,4 +1,5 @@
 ﻿using ImHere.Data.Models;
+using ImHere.Services.Rptos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using ShadySoft.EntityPersistence;
@@ -36,6 +37,26 @@ namespace ImHere.Data.Repositories
         public async Task<IEnumerable<Student>> GetNotCheckedInAsync(int eventId, DateTime start)
         {
             return await _context.Students.AddDefaultInclusions().Where(s => !s.CheckIns.Any(c => c.EventId == eventId && c.EventStart == start)).ToListAsync();
+        }
+
+        public async Task<IEnumerable<StudentOverviewRpto>> GetStudentReportDataAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _context.Students
+                .Where(s => s.CheckIns.Count() == 0 || s.CheckIns.Any(c => c.TimeStamp >= startDate && c.TimeStamp <= endDate))
+                .Select(s =>
+                new StudentOverviewRpto()
+                {
+                    Id = s.Id,
+                    FirstName = s.FirstName,
+                    LastName = s.LastName,
+                    StudentType = s.StudentType.Description,
+                    Email = s.Email,
+                    Phone = s.Phone,
+                    CheckInCount = s.CheckIns.Count(),
+                    FirstCheckIn = s.CheckIns.Min(c => c.TimeStamp),
+                    LastCheckIn = s.CheckIns.Max(c => c.TimeStamp)
+                }
+            ).ToListAsync();
         }
 
         public void Remove(Student item)
