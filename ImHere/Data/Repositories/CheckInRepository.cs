@@ -52,12 +52,12 @@ namespace ImHere.Data.Repositories
 
         public async Task<IDictionary<string, int>> GetCheckInCountsAsync(Expression<Func<CheckIn, bool>> predicate)
         {
-            return (await _context.CheckIns.AddDefaultInclusions().Where(predicate).ToListAsync()).GroupBy(c => c.Student.StudentType.Description).ToDictionary(g => g.Key, g => g.Count());
+            return (await _context.CheckIns.AddDefaultInclusions().Where(predicate).ToListAsync()).GroupBy(c => c.Student.StudentType.Description).OrderBy(c => c.First().Student.StudentTypeId).ToDictionary(g => g.Key, g => g.Count());
         }
 
         public async Task<IDictionary<string, int>> GetUniqueStudentCountsAsync(Expression<Func<CheckIn, bool>> predicate)
         {
-            return (await _context.CheckIns.AddDefaultInclusions().Where(predicate).ToListAsync()).GroupBy(c => c.Student.StudentType.Description).ToDictionary(g => g.Key, g => g.GroupBy(c => c.Student).Count());
+            return (await _context.CheckIns.AddDefaultInclusions().Where(predicate).ToListAsync()).GroupBy(c => c.Student.StudentType.Description).OrderBy(c => c.First().Student.StudentTypeId).ToDictionary(g => g.Key, g => g.GroupBy(c => c.Student).Count());
         }
 
         public void Remove(CheckIn item)

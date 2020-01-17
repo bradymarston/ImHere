@@ -8,6 +8,12 @@
 
 <h1>Attendees</h1>
 
+<div class="row sticky-top bg-white">
+    <div class="col pr-0">
+        <input class="form-control" type="text" placeholder="Search" @oninput="Refilter" />
+    </div>
+</div>
+
 <table class="table table-hover">
     <thead>
         <tr>
@@ -19,55 +25,58 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var student in students)
+        @foreach (var student in filteredStudents)
         {
-            <tr>
-                <th scope="row">@($"{student.FirstName} {student.LastName}")</th>
-                <td>@student.StudentType</td>
-                <td>@student.CheckInCount</td>
-                <td>@student.LastCheckIn.ToShortDateString()</td>
-                <td>
-                    <div style="width: 12rem">
-                        <NavLink href="@("/studentForm/" + student.Id)" class="btn btn-primary">
-                            <span class="oi oi-pencil" aria-hidden="true"></span> Edit
-                        </NavLink>
-                        @if (student.CheckInCount == 0)
+        <tr>
+            <th scope="row">@($"{student.FirstName} {student.LastName}")</th>
+            <td>@student.StudentType</td>
+            <td>@student.CheckInCount</td>
+            <td>@student.LastCheckIn.ToShortDateString()</td>
+            <td>
+                <div style="width: 12rem">
+                    <NavLink href="@("/studentForm/" + student.Id)" class="btn btn-primary">
+                        <span class="oi oi-pencil" aria-hidden="true"></span> Edit
+                    </NavLink>
+                    @if (student.CheckInCount == 0)
                         {
-                            <button class="btn btn-danger" @onclick="() => confirmingRemovalId = student.Id" disabled="@(student.Id == confirmingRemovalId)">
-                                <span class="oi oi-x"></span> Remove
-                            </button>
+                    <button class="btn btn-danger" @onclick="() => confirmingRemovalId = student.Id" disabled="@(student.Id == confirmingRemovalId)">
+                        <span class="oi oi-x"></span> Remove
+                    </button>
                         }
-                    </div>
-                    @if (student.Id == confirmingRemovalId)
+                </div>
+                @if (student.Id == confirmingRemovalId)
                     {
-                        <p></p>
-                        <div class="card" style="width: 12rem;">
-                            <div class="card-body">
-                                <p class="card-text">
-                                    Are you sure you want to remove "@($"{student.FirstName} {student.LastName}")"?
-                                </p>
-                                <button class="btn btn-success" @onclick="async () => await RemoveStudentAsync(student)">
-                                    <span class="oi oi-check"></span> Confirm
-                                </button>
-                                <button class="btn btn-secondary" @onclick="() => confirmingRemovalId = 0">
-                                    <span class="oi oi-x"></span> Cancel
-                                </button>
-                            </div>
-                        </div>
+                <p></p>
+                <div class="card" style="width: 12rem;">
+                    <div class="card-body">
+                        <p class="card-text">
+                            Are you sure you want to remove "@($"{student.FirstName} {student.LastName}")"?
+                        </p>
+                        <button class="btn btn-success" @onclick="async () => await RemoveStudentAsync(student)">
+                            <span class="oi oi-check"></span> Confirm
+                        </button>
+                        <button class="btn btn-secondary" @onclick="() => confirmingRemovalId = 0">
+                            <span class="oi oi-x"></span> Cancel
+                        </button>
+                    </div>
+                </div>
                     }
-                </td>
-            </tr>
+            </td>
+        </tr>
         }
     </tbody>
 </table>
 
 @code {
     private IList<StudentOverviewRpto> students = new List<StudentOverviewRpto>();
+    private IEnumerable<StudentOverviewRpto> filteredStudents = new List<StudentOverviewRpto>();
     private int confirmingRemovalId;
+    private string searchString = "";
 
     protected override async Task OnInitializedAsync()
     {
-        students = (await _reportingService.GetStudentOverviewReportDataAsync(DateTime.MinValue, DateTime.MaxValue)).ToList();
+        students = (await _reportingService.GetStudentOverviewReportDataAsync(DateTime.MinValue, DateTime.MaxValue)).OrderBy(s => s.FirstName).OrderBy(s => s.LastName).ToList();
+        Refilter(null);
 
         await base.OnInitializedAsync();
     }
@@ -75,6 +84,7 @@
     private async Task RemoveStudentAsync(StudentOverviewRpto student)
     {
         students.Remove(student);
+        Refilter(null);
         try
         {
             await _studentService.RemoveStudentAsync(student.Id);
@@ -82,7 +92,33 @@
         catch
         {
             students = (await _reportingService.GetStudentOverviewReportDataAsync(DateTime.MinValue, DateTime.MaxValue)).ToList();
+            Refilter(null);
             confirmingRemovalId = 0;
         }
+    }
+
+    private void Refilter(ChangeEventArgs e)
+    {
+        if (e != null)
+            searchString = (string)e.Value;
+
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            filteredStudents = students;
+            return;
+        }
+
+        var searchWords = searchString.Split(" ");
+
+
+        filteredStudents = students.Where(s =>
+        {
+            foreach (var word in searchWords)
+            {
+                if (!s.FirstName.ToUpper().StartsWith(word.ToUpper()) && !s.LastName.ToUpper().StartsWith(word.ToUpper()))
+                    return false;
+            }
+            return true;
+        });
     }
 }
