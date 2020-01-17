@@ -6,6 +6,7 @@
 @using ImHere.Data.Models
 
 @inject StudentService _studentService
+@inject CheckInService  _checkInService
 @inject NavigationManager _navigationManager
 
 <div class="row">
@@ -116,7 +117,19 @@
         {
             var newStudent = await _studentService.CreateStudentAsync(currentStudent);
             if (EventId > 0)
-                _navigationManager.NavigateTo($"/studentcheckin/{newStudent.Id}/{EventId}");
+            {
+                try
+                {
+                    await _checkInService.CheckInAsync(EventId, newStudent.Id);
+                }
+                catch
+                {
+                    _navigationManager.NavigateTo("/checkinfailed");
+                    return;
+                }
+
+                _navigationManager.NavigateTo("/index/" + EventId);
+            }
             else
                 _navigationManager.NavigateTo(returnPath);
         }
