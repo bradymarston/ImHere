@@ -35,17 +35,38 @@
                     <ValidationMessage For="@(() => currentStudent.LastName)" />
                 </small>
             </div>
-            <p class="ml-3">
-                @foreach (var st in studentTypes)
-                {
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(currentStudent.StudentTypeId == st.Id)" @onchange="() => currentStudent.StudentTypeId = st.Id">
-                        <label class="form-check-label" for="@($"studentType{st.Id}")">
-                            @st.Description
-                        </label>
-                    </div>
-                }
-            </p>
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="ml-3">
+                        @foreach (var st in studentTypes)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(currentStudent.StudentTypeId == st.Id)" @onchange="() => currentStudent.StudentTypeId = st.Id">
+                                <label class="form-check-label" for="@($"studentType{st.Id}")">
+                                    @st.Description
+                                </label>
+                            </div>
+                        }
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    Are you Methodist?
+                    <p class="ml-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="isMethodist" id="isMethodist" checked="@(currentStudent.IsMethodist)" @onchange="() => currentStudent.IsMethodist = true">
+                            <label class="form-check-label" for="isMethodist">
+                                Yes
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="isMethodist" id="notMethodist" checked="@(!currentStudent.IsMethodist)" @onchange="() => currentStudent.IsMethodist = false">
+                            <label class="form-check-label" for="notMethodist">
+                                No/Prefer not to answer
+                            </label>
+                        </div>
+                    </p>
+                </div>
+            </div>
             @if (EditingStudentId == 0)
             {
                 <p>How would you like us to be able to contact you?</p>

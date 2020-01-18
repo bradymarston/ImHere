@@ -11,6 +11,7 @@ namespace ImHere.Data.Models
         public int Id { get; set; }
         public int StudentTypeId { get; set; }
         public StudentType StudentType { get; set; }
+        public bool IsMethodist { get; set; }
         [Required]
         public string FirstName { get; set; }
         [Required]

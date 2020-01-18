@@ -10,6 +10,7 @@ namespace ImHere.Services.Dtos
     {
         public int Id { get; set; }
         public int StudentTypeId { get; set; } = 1;
+        public bool IsMethodist { get; set; }
         [Required]
         public string FirstName { get; set; }
         [Required]

@@ -18,6 +18,7 @@ namespace ImHere.Services.Mappers
             {
                 Id = student.Id,
                 StudentTypeId = student.StudentTypeId,
+                IsMethodist = student.IsMethodist,
                 FirstName = student.FirstName,
                 LastName = student.LastName,
                 Phone = student.Phone,
@@ -40,6 +41,7 @@ namespace ImHere.Services.Mappers
             {
                 Id = studentDto.Id,
                 StudentTypeId = studentDto.StudentTypeId,
+                IsMethodist = studentDto.IsMethodist,
                 FirstName = studentDto.FirstName,
                 LastName = studentDto.LastName,
                 Phone = NormalizePhoneNumber(studentDto.Phone),
@@ -57,6 +59,7 @@ namespace ImHere.Services.Mappers
             student.Phone = NormalizePhoneNumber(studentDto.Phone);
             student.Email = studentDto.Email;
             student.StudentTypeId = studentDto.StudentTypeId;
+            student.IsMethodist = studentDto.IsMethodist;
         }
 
 
