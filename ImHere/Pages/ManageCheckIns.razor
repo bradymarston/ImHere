@@ -1,0 +1,172 @@
+﻿@page "/managecheckins"
+@attribute [Authorize]
+
+@using ImHere.Services
+@using ImHere.Services.Dtos
+
+@inject ReportingService _reportingService
+@inject CheckInService  _checkInService
+
+
+<h1>Manage Check-Ins</h1>
+
+<div class="form-group">
+    <label for="event">Event</label>
+    <select id="event" class="form-control" @bind="SelectedEventId">
+        @foreach (var e in Events)
+        {
+            <option value="@e.Id">@e.Name</option>
+        }
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="date">Date</label>
+    <select id="date" class="form-control" @bind="SelectedDate">
+        @foreach (var e in FilteredEventInstances)
+        {
+            <option value="@e.InstanceStart">@e.InstanceStart.ToShortDateString()</option>
+        }
+    </select>
+</div>
+
+<p />
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Timestamp</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var i in checkIns)
+        {
+            var c = i;
+            <tr>
+                <th scope="row">@($"{c.Student.FirstName} {c.Student.LastName}")</th>
+                <td>@($"{c.TimeStamp.ToShortDateString()} - {c.TimeStamp.ToShortTimeString()}")</td>
+                <td>
+                    <button class="btn btn-danger" @onclick="(() => confirmingRemovalId = c.Id)">
+                        <span class="oi oi-delete"></span> Delete
+                    </button>
+                </td>
+            </tr>
+            @if (c.Id == confirmingRemovalId)
+            {
+                <tr>
+                    <td colspan="3">
+                        <p>
+                            Are you sure you want to remove <strong>@c.Student.FirstName @c.Student.LastName's</strong> check-in?
+                        </p>
+                        <button class="btn btn-success" @onclick="(async () => await DeleteCheckIn(c))">
+                            Yes
+                        </button>
+                        <button class="btn btn-secondary" @onclick="(() => confirmingRemovalId = 0)">
+                            No
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    public IEnumerable<EventInstanceDto> AllEventInstances = new List<EventInstanceDto>();
+    private IEnumerable<EventInfo> Events { get; set; } = new List<EventInfo>();
+    public IEnumerable<EventInstanceDto> FilteredEventInstances = new List<EventInstanceDto>();
+    public List<CheckInDto> checkIns = new List<CheckInDto>();
+
+    private int confirmingRemovalId;
+
+    private int _selectedEventId;
+
+    private int SelectedEventId
+    {
+        get
+        {
+            return _selectedEventId;
+        }
+        set
+        {
+            _selectedEventId = value;
+            if (value == 0)
+            {
+                FilteredEventInstances = new List<EventInstanceDto>();
+            }
+            else
+            {
+                FilterEventInstances();
+            }
+        }
+    }
+
+    private EventInstanceDto _selectedEventInstance = new EventInstanceDto();
+
+    private DateTime SelectedDate
+    {
+        get
+        {
+            return _selectedEventInstance.InstanceStart;
+        }
+        set
+        {
+            _selectedEventInstance = FilteredEventInstances.Single(e => e.InstanceStart == value);
+            checkIns = _selectedEventInstance.CheckIns.ToList();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchDataAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task FetchDataAsync()
+    {
+        AllEventInstances = (await _reportingService.GetEventInstancesAsync()).OrderByDescending(e => e.InstanceStart);
+
+        Events = AllEventInstances.GroupBy(e => e.EventId).Select(g => new EventInfo() { Id = g.Key, Name = g.First().Name }).ToList();
+
+        if (Events.Count() == 0)
+        {
+            SelectedEventId = 0;
+        }
+        else
+        {
+            if (!Events.Any(e => e.Id == SelectedEventId))
+                SelectedEventId = Events.First().Id;
+        }
+    }
+
+    private void FilterEventInstances()
+    {
+        FilteredEventInstances = AllEventInstances.Where(e => e.EventId == SelectedEventId).ToList();
+        if (!FilteredEventInstances.Any(e => e.InstanceStart == _selectedEventInstance.InstanceStart && e.EventId == _selectedEventInstance.EventId))
+            SelectedDate = FilteredEventInstances.First().InstanceStart;
+    }
+
+    private async Task DeleteCheckIn(CheckInDto checkIn)
+    {
+        checkIns.Remove(checkIn);
+
+        try
+        {
+            await _checkInService.RemoveCheckInAsync(checkIn.Id);
+            await FetchDataAsync();
+            FilterEventInstances();
+
+        }
+        catch
+        {
+            checkIns.Add(checkIn);
+        }
+    }
+
+    private class EventInfo
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+}

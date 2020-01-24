@@ -1,5 +1,7 @@
 ﻿using ImHere.Data.Models;
 using ImHere.Data.Repositories;
+using ImHere.Services.Dtos;
+using ImHere.Services.Mappers;
 using ShadySoft.EntityPersistence;
 using System;
 using System.Collections.Generic;
@@ -52,6 +54,14 @@ namespace ImHere.Services
                     EventStart = eventStartTime,
                     TimeStamp = currentCentralTime
                 });
+
+            await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task RemoveCheckInAsync(int checkInId)
+        {
+            var checkIn = await _checkInRepository.GetAsync(checkInId);
+            _checkInRepository.Remove(checkIn);
 
             await _unitOfWork.CompleteAsync();
         }
