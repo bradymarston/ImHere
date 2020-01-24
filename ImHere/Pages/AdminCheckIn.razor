@@ -1,0 +1,193 @@
+﻿@page "/admincheckin/{EventId:int}/{Year:int}/{Month:int}/{Day:int}"
+@attribute [Authorize]
+
+@using ImHere.Services.Dtos
+@using ImHere.Services
+@using ImHere.Data.Models
+@using ShadySoft.Blazor.FocusService
+
+@inject EventService _eventService
+@inject CheckInService _checkInService
+@inject StudentService  _studentService
+@inject FocusService _focusService 
+
+<h1>Add Check-In</h1>
+<h3>@selectedEvent.Name</h3>
+
+<div class="form-group">
+    <label for="date">Date</label>
+    <input type="date" id="date" class="form-control" @bind-value="Date" />
+</div>
+
+<div class="row">
+    <div class="col">
+        <h3>Attendees</h3>
+        <div class="form-row">
+            <AutoFocusDiv class="col" FocusElementFunc="@(() => firstNameElement)">
+                <input class="form-control" @ref="firstNameElement" type="text" placeholder="First Name" value="@firstName" @oninput="FirstNameChanged" />
+            </AutoFocusDiv>
+            <div class="col">
+                <input class="form-control" type="text" placeholder="Last Name" value="@lastName" @oninput="LastNameChanged" />
+            </div>
+        </div>
+        <p />
+        @if (filteredStudents.Count() > 0)
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var i in filteredStudents)
+                    {
+                        var s = i;
+
+                        <tr @onclick="SetFirstNameFocusAsync">
+                            <th scope="row">@($"{s.FirstName} {s.LastName}")</th>
+                            <td>@(s.StudentTypeDescription)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col">
+                    @foreach (var i in studentTypes)
+                    {
+                        var st = i;
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(studentTypeId == st.Id)" @onchange="() => studentTypeId = st.Id">
+                            <label class="form-check-label" for="@($"studentType{st.Id}")">
+                                @st.Description
+                            </label>
+                        </div>
+                    }
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-success" type="button" disabled="@(!FormIsValid)" @onclick="ClearForm">
+                        <span class="oi oi-plus" /> Add New Attendee
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="col">
+        <h3>Check-Ins (Count: @checkIns.Count())</h3>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var i in checkIns)
+                {
+                    var c = i;
+
+                    <tr>
+                        <th scope="row">@($"{c.Student.FirstName} {c.Student.LastName}")</th>
+                        <td>@($"{c.TimeStamp.ToShortDateString()} - {c.TimeStamp.ToShortTimeString()}")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int EventId { get; set; }
+    [Parameter]
+    public int Year { get; set; }
+    [Parameter]
+    public int Month { get; set; }
+    [Parameter]
+    public int Day { get; set; }
+
+    private DateTime _date;
+    private EventDto selectedEvent = new EventDto();
+    private DateTime eventStart;
+    private string firstName = "";
+    private string lastName = "";
+    private int studentTypeId = 1;
+
+    private ElementReference firstNameElement;
+
+    private IList<CheckInDto> checkIns = new List<CheckInDto>();
+    private IList<StudentDto> allStudents = new List<StudentDto>();
+    private IList<StudentDto> filteredStudents = new List<StudentDto>();
+    private IEnumerable<StudentType> studentTypes = new List<StudentType>();
+
+    private DateTime Date
+    {
+        get
+        {
+            return _date;
+        }
+        set
+        {
+            _date = value;
+            eventStart = Date + selectedEvent.Schedule.StartTime.TimeOfDay;
+            UpdateListsAsync();
+        }
+    }
+
+    private bool FormIsValid => !string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName);
+
+    private async Task UpdateListsAsync()
+    {
+        checkIns = (await _checkInService.GetCheckInsAsync(EventId, eventStart)).ToList();
+        studentTypes = (await _studentService.GetStudentTypesAsync()).OrderBy(st => st.Id);
+        studentTypeId = studentTypes.First().Id;
+        allStudents = (await _studentService.GetStudentsNotCheckedInAsync(EventId, eventStart)).ToList();
+        FilterStudents();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        selectedEvent = await _eventService.GetEventAsync(EventId);
+
+        Date = new DateTime(Year, Month, Day);
+
+        await base.OnInitializedAsync();
+    }
+
+    private void FirstNameChanged(ChangeEventArgs e)
+    {
+        firstName = e.Value.ToString();
+        FilterStudents();
+    }
+
+
+    private void LastNameChanged(ChangeEventArgs e)
+    {
+        lastName = e.Value.ToString();
+        FilterStudents();
+    }
+
+    private void ClearForm()
+    {
+        firstName = "";
+        lastName = "";
+        studentTypeId = studentTypes.First().Id;
+
+        FilterStudents();
+        SetFirstNameFocusAsync();
+    }
+
+    private void FilterStudents()
+    {
+        filteredStudents = allStudents.Where(s => s.FirstName.ToUpper().StartsWith(firstName.ToUpper()) && s.LastName.ToUpper().StartsWith(lastName.ToUpper())).ToList();
+    }
+
+    private async Task SetFirstNameFocusAsync()
+    {
+        await _focusService.SetFocusAsync(firstNameElement);
+    }
+}

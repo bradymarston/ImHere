@@ -65,5 +65,10 @@ namespace ImHere.Services
 
             await _unitOfWork.CompleteAsync();
         }
+
+        public async Task<IEnumerable<CheckInDto>> GetCheckInsAsync(int eventId, DateTime eventStart)
+        {
+            return (await _checkInRepository.GetAsync(c => c.EventId == eventId && c.EventStart == eventStart)).ToList().ToDto(); ;
+        }
     }
 }

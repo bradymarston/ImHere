@@ -68,6 +68,7 @@ namespace ImHere
             services.AddRepository<CheckIn, CheckInRepository>();
             services.AddRepository<Student, StudentRepository>();
             services.AddDefaultRepository<StudentType, ApplicationDbContext>();
+            services.AddBlazorFocusService();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
