@@ -48,7 +48,8 @@ namespace ImHere.Services
                     Student = student,
                     StudentId = student.Id,
                     EventStart = eventStartTime,
-                    TimeStamp = currentCentralTime
+                    TimeStamp = currentCentralTime,
+                    IsAdminCheckIn = false
                 });
 
             await _unitOfWork.CompleteAsync();
@@ -76,7 +77,8 @@ namespace ImHere.Services
                 Student = student,
                 StudentId = student.Id,
                 EventStart = eventStartTime,
-                TimeStamp = currentCentralTime
+                TimeStamp = currentCentralTime,
+                IsAdminCheckIn = true
             };
 
             _checkInRepository.Add(checkIn);

@@ -14,5 +14,6 @@ namespace ImHere.Data.Models
         public Student Student { get; set; }
         public DateTime EventStart { get; set; }
         public DateTime TimeStamp { get; set; }
+        public bool IsAdminCheckIn { get; set; }
     }
 }

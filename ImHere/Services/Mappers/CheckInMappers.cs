@@ -15,7 +15,8 @@ namespace ImHere.Services.Mappers
             {
                 Id = checkIn.Id,
                 Student = checkIn.Student is null ? null : checkIn.Student.ToDto(),
-                TimeStamp = checkIn.TimeStamp
+                TimeStamp = checkIn.TimeStamp,
+                IsAdminCheckIn = checkIn.IsAdminCheckIn
             };
         }
 

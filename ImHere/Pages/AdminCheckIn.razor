@@ -20,8 +20,11 @@
 </div>
 
 <div class="row" @onkeypress="KeyPressedAsync">
-    <div class="col">
-        <h3>Attendees</h3>
+    <div class="col-4">
+        <h3>Available Attendees</h3>
+        <p>
+            Search or enter new name:
+        </p>
         <div class="form-row">
             <AutoFocusDiv class="col" FocusElementFunc="@(() => firstNameElement)">
                 <input class="form-control" @ref="firstNameElement" type="text" placeholder="First Name" value="@firstName" @oninput="FirstNameChanged" disabled="@newStudentInitiated" @onkeypress="KeyPressedAsync" />
@@ -30,6 +33,8 @@
                 <input class="form-control" type="text" placeholder="Last Name" value="@lastName" @oninput="LastNameChanged" disabled="@newStudentInitiated" @onkeypress="KeyPressedAsync" />
             </div>
         </div>
+        <p />
+        Select attendee from list below:
         <p />
         @if (filteredStudents.Count() > 0)
         {
@@ -98,7 +103,7 @@
             }
         }
     </div>
-    <div class="col">
+    <div class="col-8">
         <h3>Check-Ins (Count: @checkIns.Count())</h3>
         <table class="table table-hover">
             <thead>
@@ -106,6 +111,7 @@
                     <th scope="col">Name</th>
                     <th scope="col"></th>
                     <th scope="col">Timestamp</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -113,10 +119,18 @@
                 {
                     var c = i;
 
-                    <tr>
+                    <tr @key="c.Id">
                         <th scope="row">@($"{c.Student.FirstName} {c.Student.LastName}")</th>
                         <td class="text-muted">@c.Student.StudentTypeDescription</td>
                         <td>@($"{c.TimeStamp.ToShortDateString()} - {c.TimeStamp.ToShortTimeString()}")</td>
+                        <td>
+                            @if (c.IsAdminCheckIn)
+                            {
+                                <button class="btn btn-outline-danger" @onclick="async () => await RemoveCheckInAsync(c)">
+                                    <span class="oi oi-trash" />
+                                </button>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -236,6 +250,25 @@
 
         checkIns.Add(newCheckIn);
         ClearForm();
+    }
+
+    private async Task RemoveCheckInAsync(CheckInDto checkIn)
+    {
+        checkIns.Remove(checkIn);
+        allStudents.Add(checkIn.Student);
+        FilterStudents();
+        StateHasChanged();
+
+        try
+        {
+            await _checkInService.RemoveCheckInAsync(checkIn.Id);
+        }
+        catch
+        {
+            checkIns.Add(checkIn);
+            allStudents.Remove(checkIn.Student);
+            FilterStudents();
+        }
     }
 
     private async Task KeyPressedAsync(KeyboardEventArgs e)
