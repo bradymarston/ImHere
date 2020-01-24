@@ -26,7 +26,7 @@ namespace ImHere.Services
         }
 
         public async Task CheckInAsync(int eventId, int studentId)
-        {
+            {
             var @event = await _eventRepository.GetAsync(eventId);
             if (@event is null)
                 throw new KeyNotFoundException("Couldn't find the event to check in to.");
@@ -34,10 +34,6 @@ namespace ImHere.Services
             var student = await _studentRepository.GetAsync(studentId);
             if (student is null)
                 throw new KeyNotFoundException("Couldn't find student to check in.");
-
-            var currentUtcTime = DateTime.UtcNow;
-            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
-            var currentCentralTime = TimeZoneInfo.ConvertTimeFromUtc(currentUtcTime, timeZoneInfo);
 
             var eventStartTime = @event.Schedule.GetStart(currentCentralTime);
 
@@ -58,6 +54,38 @@ namespace ImHere.Services
             await _unitOfWork.CompleteAsync();
         }
 
+        public async Task<CheckInDto> AdminCheckInAsync(int eventId, int studentId, DateTime date)
+        {
+            var @event = await _eventRepository.GetAsync(eventId);
+            if (@event is null)
+                throw new KeyNotFoundException("Couldn't find the event to check in to.");
+
+            var student = await _studentRepository.GetAsync(studentId);
+            if (student is null)
+                throw new KeyNotFoundException("Couldn't find student to check in.");
+
+            var eventStartTime = date.Date + @event.Schedule.StartTime.TimeOfDay;
+
+            if ((await _checkInRepository.GetAsync(eventId, studentId, eventStartTime)) != null)
+                throw new InvalidOperationException("Student cannot check in twice to the same event.");
+
+            var checkIn = new CheckIn
+            {
+                Event = @event,
+                EventId = @event.Id,
+                Student = student,
+                StudentId = student.Id,
+                EventStart = eventStartTime,
+                TimeStamp = currentCentralTime
+            };
+
+            _checkInRepository.Add(checkIn);
+
+            await _unitOfWork.CompleteAsync();
+
+            return checkIn.ToDto();
+        }
+
         public async Task RemoveCheckInAsync(int checkInId)
         {
             var checkIn = await _checkInRepository.GetAsync(checkInId);
@@ -69,6 +97,16 @@ namespace ImHere.Services
         public async Task<IEnumerable<CheckInDto>> GetCheckInsAsync(int eventId, DateTime eventStart)
         {
             return (await _checkInRepository.GetAsync(c => c.EventId == eventId && c.EventStart == eventStart)).ToList().ToDto(); ;
+        }
+
+        private DateTime currentCentralTime
+        {
+            get
+            {
+                var currentUtcTime = DateTime.UtcNow;
+                var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+                return TimeZoneInfo.ConvertTimeFromUtc(currentUtcTime, timeZoneInfo);
+            }
         }
     }
 }

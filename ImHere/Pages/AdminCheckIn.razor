@@ -19,15 +19,15 @@
     <input type="date" id="date" class="form-control" @bind-value="Date" />
 </div>
 
-<div class="row">
+<div class="row" @onkeypress="KeyPressedAsync">
     <div class="col">
         <h3>Attendees</h3>
         <div class="form-row">
             <AutoFocusDiv class="col" FocusElementFunc="@(() => firstNameElement)">
-                <input class="form-control" @ref="firstNameElement" type="text" placeholder="First Name" value="@firstName" @oninput="FirstNameChanged" />
+                <input class="form-control" @ref="firstNameElement" type="text" placeholder="First Name" value="@firstName" @oninput="FirstNameChanged" disabled="@newStudentInitiated" @onkeypress="KeyPressedAsync" />
             </AutoFocusDiv>
             <div class="col">
-                <input class="form-control" type="text" placeholder="Last Name" value="@lastName" @oninput="LastNameChanged" />
+                <input class="form-control" type="text" placeholder="Last Name" value="@lastName" @oninput="LastNameChanged" disabled="@newStudentInitiated" @onkeypress="KeyPressedAsync" />
             </div>
         </div>
         <p />
@@ -45,7 +45,7 @@
                     {
                         var s = i;
 
-                        <tr @onclick="SetFirstNameFocusAsync">
+                        <tr @key="s.Id" @onclick="(async () => await AddCheckInAsync(s))">
                             <th scope="row">@($"{s.FirstName} {s.LastName}")</th>
                             <td>@(s.StudentTypeDescription)</td>
                         </tr>
@@ -61,7 +61,7 @@
                     {
                         var st = i;
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(studentTypeId == st.Id)" @onchange="() => studentTypeId = st.Id">
+                            <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(studentTypeId == st.Id)" @onchange="() => studentTypeId = st.Id" disabled="@newStudentInitiated" @onkeypress="KeyPressedAsync">
                             <label class="form-check-label" for="@($"studentType{st.Id}")">
                                 @st.Description
                             </label>
@@ -69,11 +69,33 @@
                     }
                 </div>
                 <div class="col-auto">
-                    <button class="btn btn-success" type="button" disabled="@(!FormIsValid)" @onclick="ClearForm">
+                    <button class="btn btn-success" type="button" disabled="@(!FormIsValid || newStudentInitiated)" @onclick="() => newStudentInitiated = true">
                         <span class="oi oi-plus" /> Add New Attendee
                     </button>
                 </div>
             </div>
+            @if (newStudentInitiated)
+            {
+                <p />
+                <div>
+                    Do you want to add and check-in <strong>@($"{firstName} {lastName}")</strong> as a <strong>@studentTypes.Single(st => st.Id == studentTypeId).Description</strong>?
+                </div>
+                <p />
+                <button class="btn btn-success" type="button" @onclick="AddAndCheckInNewStudent">
+                    <span class="oi oi-check" /> Register and Check In
+                </button>
+                <button class="btn btn-secondary" type="button" @onclick="CancelNewStudent">
+                    Cancel
+                </button>
+
+                @if (StudentNameIsCheckedIn(firstName, lastName))
+                {
+                    <p />
+                    <div class="alert alert-danger">
+                        An attendee by that name is already checked in. If you proceed you will be creating a second attendee by the same name.
+                    </div>
+                }
+            }
         }
     </div>
     <div class="col">
@@ -82,16 +104,18 @@
             <thead>
                 <tr>
                     <th scope="col">Name</th>
+                    <th scope="col"></th>
                     <th scope="col">Timestamp</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var i in checkIns)
+                @foreach (var i in checkIns.OrderByDescending(c => c.Id))
                 {
                     var c = i;
 
                     <tr>
                         <th scope="row">@($"{c.Student.FirstName} {c.Student.LastName}")</th>
+                        <td class="text-muted">@c.Student.StudentTypeDescription</td>
                         <td>@($"{c.TimeStamp.ToShortDateString()} - {c.TimeStamp.ToShortTimeString()}")</td>
                     </tr>
                 }
@@ -116,6 +140,7 @@
     private string firstName = "";
     private string lastName = "";
     private int studentTypeId = 1;
+    private bool newStudentInitiated = false;
 
     private ElementReference firstNameElement;
 
@@ -171,23 +196,94 @@
         FilterStudents();
     }
 
+    private async Task AddCheckInAsync(StudentDto student)
+    {
+        allStudents.Remove(student);
+        FilterStudents();
+
+        var newCheckIn = new CheckInDto();
+
+        try
+        {
+            newCheckIn = await _checkInService.AdminCheckInAsync(selectedEvent.Id, student.Id, Date);
+        }
+        catch
+        {
+            allStudents.Add(student);
+            FilterStudents();
+            return;
+        }
+
+        checkIns.Add(newCheckIn);
+        ClearForm();
+    }
+
+    private void CancelNewStudent()
+    {
+        newStudentInitiated = false;
+    }
+
+    private async Task AddAndCheckInNewStudent()
+    {
+        var newStudent = await _studentService.CreateStudentAsync(new StudentDto
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            StudentTypeId = studentTypeId
+        });
+
+        var newCheckIn = await _checkInService.AdminCheckInAsync(selectedEvent.Id, newStudent.Id, Date);
+
+        checkIns.Add(newCheckIn);
+        ClearForm();
+    }
+
+    private async Task KeyPressedAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            if (filteredStudents.Count == 1)
+            {
+                await AddCheckInAsync(filteredStudents.First());
+                return;
+            }
+
+            if (filteredStudents.Count == 0)
+            {
+                newStudentInitiated = true;
+            }
+        }
+    }
+
     private void ClearForm()
     {
+        newStudentInitiated = false;
         firstName = "";
         lastName = "";
         studentTypeId = studentTypes.First().Id;
 
+        StateHasChanged();
+
         FilterStudents();
+        StateHasChanged();
         SetFirstNameFocusAsync();
     }
 
     private void FilterStudents()
     {
-        filteredStudents = allStudents.Where(s => s.FirstName.ToUpper().StartsWith(firstName.ToUpper()) && s.LastName.ToUpper().StartsWith(lastName.ToUpper())).ToList();
+        filteredStudents = allStudents.Where(s =>
+                s.FirstName.ToUpper().StartsWith(firstName.ToUpper()) &&
+                s.LastName.ToUpper().StartsWith(lastName.ToUpper()))
+            .OrderBy(s => s.FirstName).OrderBy(s => s.LastName).ToList();
     }
 
     private async Task SetFirstNameFocusAsync()
     {
         await _focusService.SetFocusAsync(firstNameElement);
+    }
+
+    private bool StudentNameIsCheckedIn(string firstName, string lastName)
+    {
+        return checkIns.Any(c => c.Student.FirstName.ToUpper() == firstName.ToUpper() && c.Student.LastName.ToUpper() == lastName.ToUpper());
     }
 }
