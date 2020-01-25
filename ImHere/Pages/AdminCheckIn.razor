@@ -9,17 +9,39 @@
 @inject EventService _eventService
 @inject CheckInService _checkInService
 @inject StudentService  _studentService
-@inject FocusService _focusService 
+@inject FocusService _focusService
+@inject NavigationManager _navigationManager 
 
-<h1>Add Check-In</h1>
-<h3>@selectedEvent.Name</h3>
+<div class="row">
+    <div class="col-lg-10 col-xl-8">
+        <div class="row">
+            <div class="col">
+                <h1>Manage Admin Check-Ins</h1>
+            </div>
+            <div class="col-auto">
+                <NavLink class="btn btn-secondary" href="/managecheckins">
+                    Back
+                </NavLink>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="event">Event:</label>
+            <select id="event" class="form-control" @bind="selectedEventId">
+                @foreach (var e in events)
+                {
+                    <option value="@e.Id">@e.Name</option>
+                }
+            </select>
+        </div>
 
-<div class="form-group">
-    <label for="date">Date</label>
-    <input type="date" id="date" class="form-control" @bind-value="Date" />
+        <div class="form-group">
+            <label for="date">Date:</label>
+            <input type="date" id="date" class="form-control" @bind-value="date" />
+        </div>
+    </div>
 </div>
 
-<div class="row" @onkeypress="KeyPressedAsync">
+<div class="row">
     <div class="col-4">
         <h3>Available Attendees</h3>
         <p>
@@ -148,9 +170,31 @@
     [Parameter]
     public int Day { get; set; }
 
-    private DateTime _date;
     private EventDto selectedEvent = new EventDto();
-    private DateTime eventStart;
+
+    private int selectedEventId
+    {
+        get => selectedEvent.Id;
+        set
+        {
+            selectedEvent = events.Single(e => e.Id == value);
+            Navigate();
+        }
+    }
+
+    private DateTime _date;
+
+    private DateTime date
+    {
+        get => _date;
+        set
+        {
+            _date = value;
+            Navigate();
+        }
+    }
+
+    private DateTime eventStart => date + selectedEvent.Schedule.StartTime.TimeOfDay;
     private string firstName = "";
     private string lastName = "";
     private int studentTypeId = 1;
@@ -158,26 +202,29 @@
 
     private ElementReference firstNameElement;
 
+    private IEnumerable<EventDto> events = new List<EventDto>();
     private IList<CheckInDto> checkIns = new List<CheckInDto>();
     private IList<StudentDto> allStudents = new List<StudentDto>();
     private IList<StudentDto> filteredStudents = new List<StudentDto>();
     private IEnumerable<StudentType> studentTypes = new List<StudentType>();
 
-    private DateTime Date
-    {
-        get
-        {
-            return _date;
-        }
-        set
-        {
-            _date = value;
-            eventStart = Date + selectedEvent.Schedule.StartTime.TimeOfDay;
-            UpdateListsAsync();
-        }
-    }
 
     private bool FormIsValid => !string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName);
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        events = await _eventService.GetEventsAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        selectedEvent = events.Single(e => e.Id == EventId);
+        _date = new DateTime(Year, Month, Day);
+        await UpdateListsAsync();
+
+        await base.OnParametersSetAsync();
+    }
 
     private async Task UpdateListsAsync()
     {
@@ -188,13 +235,9 @@
         FilterStudents();
     }
 
-    protected override async Task OnInitializedAsync()
+    private void Navigate()
     {
-        selectedEvent = await _eventService.GetEventAsync(EventId);
-
-        Date = new DateTime(Year, Month, Day);
-
-        await base.OnInitializedAsync();
+        _navigationManager.NavigateTo($"/admincheckin/{selectedEvent.Id}/{date.Year}/{date.Month}/{date.Day}");
     }
 
     private void FirstNameChanged(ChangeEventArgs e)
@@ -219,7 +262,7 @@
 
         try
         {
-            newCheckIn = await _checkInService.AdminCheckInAsync(selectedEvent.Id, student.Id, Date);
+            newCheckIn = await _checkInService.AdminCheckInAsync(selectedEvent.Id, student.Id, date);
         }
         catch
         {
@@ -246,7 +289,7 @@
             StudentTypeId = studentTypeId
         });
 
-        var newCheckIn = await _checkInService.AdminCheckInAsync(selectedEvent.Id, newStudent.Id, Date);
+        var newCheckIn = await _checkInService.AdminCheckInAsync(selectedEvent.Id, newStudent.Id, date);
 
         checkIns.Add(newCheckIn);
         ClearForm();
