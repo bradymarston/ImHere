@@ -33,11 +33,11 @@
 <NavLink class="btn btn-success" href="@($"/admincheckin/{SelectedEventId}/{SelectedDate.Year}/{SelectedDate.Month}/{SelectedDate.Day}")">
     <span class="oi oi-plus" /> Add Check-Ins
 </NavLink>
-
 <p />
 <table class="table table-hover">
     <thead>
         <tr>
+            <th scope="col"></th>
             <th scope="col">Name</th>
             <th scope="col">Timestamp</th>
             <th scope="col"></th>
@@ -47,19 +47,25 @@
         @foreach (var i in checkIns)
         {
             var c = i;
-            <tr>
+            <tr @key="c.Id">
+                <td>
+                    @if (c.IsAdminCheckIn)
+                    {
+                        <span class="oi oi-star" />
+                    }
+                </td>
                 <th scope="row">@($"{c.Student.FirstName} {c.Student.LastName}")</th>
                 <td>@($"{c.TimeStamp.ToShortDateString()} - {c.TimeStamp.ToShortTimeString()}")</td>
                 <td>
                     <button class="btn btn-danger" @onclick="(() => confirmingRemovalId = c.Id)">
-                        <span class="oi oi-delete"></span> Delete
+                        Delete
                     </button>
                 </td>
             </tr>
             @if (c.Id == confirmingRemovalId)
             {
                 <tr>
-                    <td colspan="3">
+                    <td colspan="4">
                         <p>
                             Are you sure you want to remove <strong>@c.Student.FirstName @c.Student.LastName's</strong> check-in?
                         </p>
@@ -75,6 +81,9 @@
         }
     </tbody>
 </table>
+<p />
+<span class="oi oi-star" /> = Admin logged check-in
+
 
 @code {
     public IEnumerable<EventInstanceDto> AllEventInstances = new List<EventInstanceDto>();

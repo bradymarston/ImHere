@@ -7,6 +7,10 @@
 
 <h1>Event Report - Overall</h1>
 
+<p />
+<span class="oi oi-star" /> = Admin logged check-in
+<p />
+
 <div class="row">
     <div class="col-md-11 col-lg-8 col-xl-6">
         <table class="table table-borderless">
@@ -35,9 +39,9 @@
                             <td></td>
                             <td colspan="3">
                                 @foreach (var count in GetCountsByType(SelectedEvent))
-                                        {
-                                <div>@($"{count.Key} count: {count.Value}")</div>
-                                        }
+                                {
+                                    <div>@($"{count.Key} count: {count.Value}")</div>
+                                }
                             </td>
                         </tr>
                         <tr>
@@ -46,6 +50,7 @@
                                 <table class="table">
                                     <thead class="thead-light">
                                         <tr>
+                                            <th scope="col"></th>
                                             <th scope="col">Attendee Name</th>
                                             <th></th>
                                             <th scope="col">Check-In Time</th>
@@ -53,13 +58,19 @@
                                     </thead>
                                     <tbody>
                                         @foreach (var c in e.CheckIns)
-                                                {
-                                        <tr>
-                                            <th scope="row">@(c.Student.FirstName + " " + c.Student.LastName)</th>
-                                            <td class="text-right text-muted">@c.Student.StudentTypeDescription</td>
-                                            <td class="text-right">@c.TimeStamp.ToShortTimeString()</td>
-                                        </tr>
-                                                }
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @if (c.IsAdminCheckIn)
+                                                    {
+                                                        <span class="oi oi-star" />
+                                                    }
+                                                </td>
+                                                <th scope="row">@(c.Student.FirstName + " " + c.Student.LastName)</th>
+                                                <td class="text-right text-muted">@c.Student.StudentTypeDescription</td>
+                                                <td class="text-right">@c.TimeStamp.ToShortTimeString()</td>
+                                            </tr>
+                                        }
                                     </tbody>
                                 </table>
                             </td>
