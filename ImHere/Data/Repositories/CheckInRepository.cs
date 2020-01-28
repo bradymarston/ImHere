@@ -55,6 +55,16 @@ namespace ImHere.Data.Repositories
             return (await _context.CheckIns.AddDefaultInclusions().Where(predicate).ToListAsync()).GroupBy(c => c.Student.StudentType.Description).OrderBy(c => c.First().Student.StudentTypeId).ToDictionary(g => g.Key, g => g.Count());
         }
 
+        public async Task<CheckIn> GetLatestStudentCheckInAsync(int studentId)
+        {
+            return await _context.CheckIns.AddDefaultInclusions().Where(c => !c.IsAdminCheckIn && c.StudentId == studentId).OrderBy(c => c.TimeStamp).LastOrDefaultAsync();
+        }
+
+        public async Task<CheckIn> GetFirstStudentCheckInAsync(int studentId)
+        {
+            return await _context.CheckIns.AddDefaultInclusions().Where(c => !c.IsAdminCheckIn && c.StudentId == studentId).OrderBy(c => c.TimeStamp).FirstOrDefaultAsync();
+        }
+
         public async Task<IDictionary<string, int>> GetUniqueStudentCountsAsync(Expression<Func<CheckIn, bool>> predicate)
         {
             return (await _context.CheckIns.AddDefaultInclusions().Where(predicate).ToListAsync()).GroupBy(c => c.Student.StudentType.Description).OrderBy(c => c.First().Student.StudentTypeId).ToDictionary(g => g.Key, g => g.GroupBy(c => c.Student).Count());

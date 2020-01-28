@@ -104,6 +104,16 @@ namespace ImHere.Services
                 return (await _checkInRepository.GetAsync(c => c.EventId == eventId && c.EventStart == eventStart)).ToList().ToDto();
         }
 
+        public async Task<CheckInDto> GetLatestStudentCheckInAsync(int studentId)
+        {
+            return (await _checkInRepository.GetLatestStudentCheckInAsync(studentId))?.ToDto();
+        }
+
+        public async Task<CheckInDto> GetFirstStudentCheckInAsync(int studentId)
+        {
+            return (await _checkInRepository.GetFirstStudentCheckInAsync(studentId))?.ToDto();
+        }
+
         private DateTime currentCentralTime
         {
             get

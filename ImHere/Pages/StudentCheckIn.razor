@@ -21,12 +21,31 @@ else
     else
     {
         <h1>Welcome @student.DisplayName</h1>
-        <button type="button" class="btn btn-success" @onclick="DoCheckInAsync">
-            <span class="oi oi-check"></span> Finish Check-In to @selectedEvent.Name
-        </button>
-        <NavLink href="" class="btn btn-secondary">
-            <span class="oi oi-x"></span> Cancel
-        </NavLink>
+        if (confirmingMethodism)
+        {
+            <h4>Are you Methodist?</h4>
+            <p />
+            <button class="btn btn-primary" @onclick="async () => await SetMethodismAsync(true)">
+                Yes, I am Methodist
+            </button>
+            <button class="btn btn-secondary" @onclick="async () => await SetMethodismAsync(false)">
+                No, I am not Methodist or I prefer not to answer
+            </button>
+        }
+        else
+        {
+            @if (confirmedMethodism)
+            {
+                <h4>Thank you</h4>
+                <p />
+            }
+            <button type="button" class="btn btn-success" @onclick="DoCheckInAsync">
+                <span class="oi oi-check"></span> Finish Check-In to @selectedEvent.Name
+            </button>
+            <NavLink href="" class="btn btn-secondary">
+                <span class="oi oi-x"></span> Cancel
+            </NavLink>
+        }
     }
 }
 
@@ -39,12 +58,38 @@ else
     private StudentDto student;
     private EventDto selectedEvent;
 
+    private bool confirmingMethodism = false;
+    private bool confirmedMethodism = false;
+
     protected async override Task OnParametersSetAsync()
     {
         student = await _studentService.GetStudentAsync(StudentId);
         selectedEvent = await _eventService.GetEventAsync(EventId);
 
+        var newestCheckIn = await _checkInService.GetLatestStudentCheckInAsync(StudentId);
+
+        if (newestCheckIn != null)
+        {
+            if (newestCheckIn.TimeStamp < new DateTime(2020, 1, 28))
+            {
+                var oldestCheckIn = await _checkInService.GetFirstStudentCheckInAsync(StudentId);
+
+                if (oldestCheckIn.TimeStamp < new DateTime(2020, 1, 17))
+                {
+                    confirmingMethodism = true;
+                    return;
+                }
+            }
+        }
+
         await base.OnParametersSetAsync();
+    }
+
+    private async Task SetMethodismAsync(bool isMethodist)
+    {
+        await _studentService.SetMethodismAsync(StudentId, isMethodist);
+        confirmingMethodism = false;
+        confirmedMethodism = true;
     }
 
     private async Task DoCheckInAsync()

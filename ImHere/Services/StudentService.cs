@@ -91,6 +91,13 @@ namespace ImHere.Services
             return (await _studentRepository.GetNotCheckedInAsync(eventId, start)).ToDto();
         }
 
+        public async Task SetMethodismAsync(int studentId, bool isMethodist)
+        {
+            var studentInDb = await GetStudentAsync(studentId);
+            studentInDb.IsMethodist = isMethodist;
+            await UpdateStudent(studentInDb);
+        }
+
         public async Task<StudentDto> UpdateStudent(StudentDto studentDto)
         {
             if (studentDto is null)
