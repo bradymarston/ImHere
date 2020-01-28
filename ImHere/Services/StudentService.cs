@@ -1,12 +1,14 @@
 ﻿using ImHere.Data.Models;
 using ImHere.Data.Repositories;
 using ImHere.Services.Dtos;
+using ImHere.Services.Exceptions;
 using ImHere.Services.Mappers;
 using ShadySoft.EntityPersistence;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace ImHere.Services
@@ -17,6 +19,9 @@ namespace ImHere.Services
         private readonly IRepository<StudentType> _studentTypeRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly CheckInRepository _checkInRepository;
+
+        //Filter predicates
+        private Expression<Func<Student, bool>> MatchingNameFilter(StudentDto studentDto) => s => s.FirstName.ToUpper() == studentDto.FirstName.ToUpper() && s.LastName.ToUpper() == studentDto.LastName.ToUpper();
 
         public StudentService(StudentRepository studentRepository, IRepository<StudentType> studentTypeRepository, IUnitOfWork unitOfWork, CheckInRepository checkInRepository)
         {
@@ -31,6 +36,35 @@ namespace ImHere.Services
             if (studentDto is null)
             {
                 throw new ArgumentNullException(nameof(studentDto));
+            }
+
+            var duplicateStudents = await _studentRepository.GetAsync(MatchingNameFilter(studentDto));
+
+            if (string.IsNullOrWhiteSpace(studentDto.Differentiator))
+            {
+                var baseStudent = duplicateStudents.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.Differentiator));
+                if (baseStudent != null)
+                {
+                    var baseStudentCheckIns = await _checkInRepository.GetAsync(c => c.Student.Id == baseStudent.Id);
+
+                    if (baseStudentCheckIns.Count() > 0 && !baseStudentCheckIns.Any(c => !c.IsAdminCheckIn))
+                    {
+                        var updatedStudent = baseStudent.ToDto();
+                        updatedStudent.FirstName = studentDto.FirstName;
+                        updatedStudent.LastName = studentDto.LastName;
+                        updatedStudent.IsMethodist = studentDto.IsMethodist;
+                        updatedStudent.StudentTypeId = studentDto.StudentTypeId;
+                        updatedStudent.Phone = studentDto.Phone;
+                        updatedStudent.Email = studentDto.Email;
+
+                        return await UpdateStudent(updatedStudent);
+                    }
+                }
+            }
+
+            if (duplicateStudents.Any(s => s.Differentiator == studentDto.Differentiator))
+            {
+                throw new DuplicateStudentException(duplicateStudents.Select(s => s.Differentiator));
             }
 
             var newStudent = studentDto.ToData();
@@ -57,7 +91,7 @@ namespace ImHere.Services
             return (await _studentRepository.GetNotCheckedInAsync(eventId, start)).ToDto();
         }
 
-        public async Task UpdateStudent(StudentDto studentDto)
+        public async Task<StudentDto> UpdateStudent(StudentDto studentDto)
         {
             if (studentDto is null)
             {
@@ -72,6 +106,8 @@ namespace ImHere.Services
             studentInDb.Update(studentDto);
 
             await _unitOfWork.CompleteAsync();
+
+            return studentInDb.ToDto();
         }
 
         public async Task RemoveStudentAsync(int studentId)

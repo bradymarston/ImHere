@@ -20,7 +20,7 @@ else
     }
     else
     {
-        <h1>Welcome @student.FirstName @student.LastName</h1>
+        <h1>Welcome @student.DisplayName</h1>
         <button type="button" class="btn btn-success" @onclick="DoCheckInAsync">
             <span class="oi oi-check"></span> Finish Check-In to @selectedEvent.Name
         </button>

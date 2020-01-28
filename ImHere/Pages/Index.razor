@@ -59,7 +59,7 @@
                         @foreach (var student in filteredStudents)
                         {
                         <tr @onclick="@(() => StudentSelected(student))">
-                            <td>@(student.FirstName + " " + student.LastName)</td>
+                            <td>@student.DisplayName</td>
                             <td class="text-right text-muted">@student.StudentTypeDescription</td>
                         </tr>
                         }

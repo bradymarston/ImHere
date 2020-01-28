@@ -73,7 +73,7 @@
                         var s = i;
 
                         <tr @key="s.Id" @onclick="(async () => await AddCheckInAsync(s))">
-                            <th scope="row">@($"{s.FirstName} {s.LastName}")</th>
+                            <th scope="row">@s.DisplayName</th>
                             <td>@(s.StudentTypeDescription)</td>
                         </tr>
                     }
@@ -142,7 +142,7 @@
                     var c = i;
 
                     <tr @key="c.Id">
-                        <th scope="row">@($"{c.Student.FirstName} {c.Student.LastName}")</th>
+                        <th scope="row">@c.Student.DisplayName</th>
                         <td class="text-muted">@c.Student.StudentTypeDescription</td>
                         <td>@($"{c.TimeStamp.ToShortDateString()} - {c.TimeStamp.ToShortTimeString()}")</td>
                         <td>

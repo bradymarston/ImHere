@@ -66,7 +66,7 @@
                                                         <span class="oi oi-star" />
                                                     }
                                                 </td>
-                                                <th scope="row">@(c.Student.FirstName + " " + c.Student.LastName)</th>
+                                                <th scope="row">@c.Student.DisplayName</th>
                                                 <td class="text-right text-muted">@c.Student.StudentTypeDescription</td>
                                                 <td class="text-right">@c.TimeStamp.ToShortTimeString()</td>
                                             </tr>

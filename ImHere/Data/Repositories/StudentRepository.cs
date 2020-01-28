@@ -6,6 +6,7 @@ using ShadySoft.EntityPersistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace ImHere.Data.Repositories
@@ -29,6 +30,11 @@ namespace ImHere.Data.Repositories
             return await _context.Students.AddDefaultInclusions().ToListAsync();
         }
 
+        public async Task<IEnumerable<Student>> GetAsync(Expression<Func<Student, bool>> filterPredicate)
+        {
+            return await _context.Students.AddDefaultInclusions().Where(filterPredicate).ToListAsync();
+        }
+
         public async Task<Student> GetAsync(int id)
         {
             return await _context.Students.AddDefaultInclusions().SingleOrDefaultAsync(s => s.Id == id);
@@ -49,6 +55,7 @@ namespace ImHere.Data.Repositories
                     Id = s.Id,
                     FirstName = s.FirstName,
                     LastName = s.LastName,
+                    Differentiator = s.Differentiator,
                     StudentType = s.StudentType.Description,
                     Email = s.Email,
                     Phone = s.Phone,

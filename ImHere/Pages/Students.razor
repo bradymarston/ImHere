@@ -28,7 +28,7 @@
         @foreach (var student in filteredStudents)
         {
         <tr>
-            <th scope="row">@($"{student.FirstName} {student.LastName}")</th>
+            <th scope="row">@student.DisplayName</th>
             <td>@student.StudentType</td>
             <td>@student.CheckInCount</td>
             <td>@student.LastCheckIn.ToShortDateString()</td>

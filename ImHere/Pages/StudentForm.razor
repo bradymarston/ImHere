@@ -4,6 +4,7 @@
 @using ImHere.Services.Dtos
 @using ImHere.Services
 @using ImHere.Data.Models
+@using ImHere.Services.Exceptions
 
 @inject StudentService _studentService
 @inject CheckInService  _checkInService
@@ -15,7 +16,8 @@
         {
             <h1>New Attendee</h1>
             <p>Please enter your name. If you'd like us to be able to contact you, please provide your phone number, email address, or both.</p>
-        } else
+        }
+        else
         {
             <h1>Editing Attendee</h1>
         }
@@ -23,14 +25,14 @@
             <DataAnnotationsValidator />
             <div class="form-group">
                 <label for="first-name">First Name</label>
-                <InputText id="first-name" class="form-control" @bind-Value="@currentStudent.FirstName" placeholder="First Name" />
+                <InputText id="first-name" class="form-control" @bind-Value="@currentStudent.FirstName" placeholder="First Name" disabled="@duplicateExists" />
                 <small class="form-text">
                     <ValidationMessage For="@(() => currentStudent.FirstName)" />
                 </small>
             </div>
             <div class="form-group">
                 <label for="last-name">Last Name</label>
-                <InputText id="last-name" class="form-control" @bind-Value="@currentStudent.LastName" placeholder="Last Name" />
+                <InputText id="last-name" class="form-control" @bind-Value="@currentStudent.LastName" placeholder="Last Name" disabled="@duplicateExists" />
                 <small class="form-text">
                     <ValidationMessage For="@(() => currentStudent.LastName)" />
                 </small>
@@ -41,7 +43,7 @@
                         @foreach (var st in studentTypes)
                         {
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(currentStudent.StudentTypeId == st.Id)" @onchange="() => currentStudent.StudentTypeId = st.Id">
+                                <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(currentStudent.StudentTypeId == st.Id)" @onchange="() => currentStudent.StudentTypeId = st.Id" disabled="@duplicateExists">
                                 <label class="form-check-label" for="@($"studentType{st.Id}")">
                                     @st.Description
                                 </label>
@@ -53,13 +55,13 @@
                     Are you Methodist?
                     <p class="ml-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="isMethodist" id="isMethodist" checked="@(currentStudent.IsMethodist)" @onchange="() => currentStudent.IsMethodist = true">
+                            <input class="form-check-input" type="radio" name="isMethodist" id="isMethodist" checked="@(currentStudent.IsMethodist)" @onchange="() => currentStudent.IsMethodist = true" disabled="@duplicateExists">
                             <label class="form-check-label" for="isMethodist">
                                 Yes
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="isMethodist" id="notMethodist" checked="@(!currentStudent.IsMethodist)" @onchange="() => currentStudent.IsMethodist = false">
+                            <input class="form-check-input" type="radio" name="isMethodist" id="notMethodist" checked="@(!currentStudent.IsMethodist)" @onchange="() => currentStudent.IsMethodist = false" disabled="@duplicateExists">
                             <label class="form-check-label" for="notMethodist">
                                 No/Prefer not to answer
                             </label>
@@ -70,33 +72,57 @@
             @if (EditingStudentId == 0)
             {
                 <p>How would you like us to be able to contact you?</p>
-            } else
+            }
+            else
             {
                 <p>Contact Info:</p>
             }
             <div class="ml-3">
                 <div class="form-group">
                     <label for="phone">Phone Number (Optional)</label>
-                    <InputText id="phone" class="form-control" @bind-Value="@currentStudent.Phone" placeholder="(XXX) XXX-XXXX" />
+                    <InputText id="phone" class="form-control" @bind-Value="@currentStudent.Phone" placeholder="(XXX) XXX-XXXX" disabled="@duplicateExists" />
                     <small class="form-text">
                         <ValidationMessage For="@(() => currentStudent.Phone)" />
                     </small>
                 </div>
                 <div class="form-group">
                     <label for="email">Email Address (Optional)</label>
-                    <InputText id="email" class="form-control" @bind-Value="@currentStudent.Email" placeholder="youraddress@domain.com" />
+                    <InputText id="email" class="form-control" @bind-Value="@currentStudent.Email" placeholder="youraddress@domain.com" disabled="@duplicateExists" />
                     <small class="form-text">
                         <ValidationMessage For="@(() => currentStudent.Email)" />
                     </small>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">
-                <span><span class="oi oi-check" aria-hidden="true"></span>@(EditingStudentId == 0 ? "Register and Check In" : " Save Changes")</span>
+            <button type="submit" class="btn btn-primary" disabled="@duplicateExists">
+                <span><span class="oi oi-check" aria-hidden="true"></span> @(EditingStudentId == 0 ? "Register and Check In" : " Save Changes")</span>
             </button>
             <NavLink href="@returnPath" class="btn btn-secondary">
                 <span class="oi oi-x"></span> Cancel
             </NavLink>
         </EditForm>
+
+        @if (duplicateExists)
+        {
+            <p />
+            <div class="alert alert-danger">
+                Somebody has already registered under that name, please provide something to differentiate yourself from the other person (i.e., a nickname, middle name, single letter, number, random word, etc.).
+            </div>
+            <div class="form-group">
+                <input class="form-control" type="text" placeholder="Nickname, middle name, etc." @oninput="SetDifferentiator" />
+            </div>
+
+            <button type="button" class="btn btn-success" disabled="@string.IsNullOrWhiteSpace(currentStudent.Differentiator)" @onclick="SubmitWithDifferentiatorAsync">
+                <span class="oi oi-check" aria-hidden="true"></span> Register and Check In
+            </button>
+
+            @if (duplicateDifferentiator)
+            {
+                <p />
+                <div class="alert alert-danger">
+                    Wow! Somebody else has the exact same name and chose the same differentiating word as you. What are the odds? Please try again.
+                </div>
+            }
+        }
     </div>
 </div>
 
@@ -104,6 +130,9 @@
     private StudentDto currentStudent = new StudentDto();
     private IEnumerable<StudentType> studentTypes = new List<StudentType>();
     private string returnPath = "";
+    private bool duplicateExists = false;
+    private IEnumerable<string> differentiatorsInUse = new List<string>();
+    private bool duplicateDifferentiator = false;
 
     [Parameter]
     public int EventId { get; set; }
@@ -136,7 +165,19 @@
     {
         if (EditingStudentId == 0)
         {
-            var newStudent = await _studentService.CreateStudentAsync(currentStudent);
+            StudentDto newStudent;
+            try
+            {
+                newStudent = await _studentService.CreateStudentAsync(currentStudent);
+            }
+            catch (DuplicateStudentException e)
+            {
+                duplicateExists = true;
+                differentiatorsInUse = e.DifferentiatorsInUse;
+                return;
+            }
+
+
             if (EventId > 0)
             {
                 try
@@ -159,5 +200,22 @@
             await _studentService.UpdateStudent(currentStudent);
             _navigationManager.NavigateTo(returnPath);
         }
+    }
+
+    private void SetDifferentiator(ChangeEventArgs e)
+    {
+        currentStudent.Differentiator = e.Value.ToString();
+        duplicateDifferentiator = false;
+    }
+
+    private async Task SubmitWithDifferentiatorAsync()
+    {
+        if (differentiatorsInUse.Any(d => d == currentStudent.Differentiator))
+        {
+            duplicateDifferentiator = true;
+            return;
+        }
+
+        await SubmitAsync(null);
     }
 }

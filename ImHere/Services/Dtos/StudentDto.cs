@@ -21,5 +21,7 @@ namespace ImHere.Services.Dtos
         [EmailAddress]
         public string Email { get; set; }
         public string StudentTypeDescription { get; set; }
+
+        public string DisplayName => $"{FirstName} {LastName}" + (string.IsNullOrWhiteSpace(Differentiator) ? "" : $" ({Differentiator})"); 
     }
 }
