@@ -21,6 +21,7 @@ namespace ImHere.Services.Mappers
                 IsMethodist = student.IsMethodist,
                 FirstName = student.FirstName,
                 LastName = student.LastName,
+                Differentiator = student.Differentiator,
                 Phone = student.Phone,
                 Email = student.Email,
                 StudentTypeDescription = student?.StudentType.Description
@@ -44,6 +45,7 @@ namespace ImHere.Services.Mappers
                 IsMethodist = studentDto.IsMethodist,
                 FirstName = studentDto.FirstName,
                 LastName = studentDto.LastName,
+                Differentiator = studentDto.Differentiator,
                 Phone = NormalizePhoneNumber(studentDto.Phone),
                 Email = studentDto.Email
             };
@@ -56,6 +58,7 @@ namespace ImHere.Services.Mappers
 
             student.FirstName = studentDto.FirstName;
             student.LastName = studentDto.LastName;
+            student.Differentiator = studentDto.Differentiator;
             student.Phone = NormalizePhoneNumber(studentDto.Phone);
             student.Email = studentDto.Email;
             student.StudentTypeId = studentDto.StudentTypeId;

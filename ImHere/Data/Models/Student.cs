@@ -16,6 +16,7 @@ namespace ImHere.Data.Models
         public string FirstName { get; set; }
         [Required]
         public string LastName { get; set; }
+        public string Differentiator { get; set; }
         [Phone]
         public string Phone { get; set; }
         [EmailAddress]
