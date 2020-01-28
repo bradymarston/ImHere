@@ -10,6 +10,7 @@ namespace ImHere.Services.Dtos
         public int Id { get; set; }
         public StudentDto Student { get; set; }
         public DateTime TimeStamp { get; set; }
+        public DateTime EventStart { get; set; }
         public bool IsAdminCheckIn { get; set; }
     }
 }

@@ -228,7 +228,7 @@
 
     private async Task UpdateListsAsync()
     {
-        checkIns = (await _checkInService.GetCheckInsAsync(EventId, eventStart)).ToList();
+        checkIns = (await _checkInService.GetCheckInsAsync(EventId, eventStart, matchDateOnly: true)).ToList();
         studentTypes = (await _studentService.GetStudentTypesAsync()).OrderBy(st => st.Id);
         studentTypeId = studentTypes.First().Id;
         allStudents = (await _studentService.GetStudentsNotCheckedInAsync(EventId, eventStart)).ToList();
@@ -262,7 +262,13 @@
 
         try
         {
-            newCheckIn = await _checkInService.AdminCheckInAsync(selectedEvent.Id, student.Id, date);
+            if (checkIns.Count() == 0)
+                newCheckIn = await _checkInService.AdminCheckInAsync(selectedEvent.Id, student.Id, date, useEventStartTimeInDb: true);
+            else
+            {
+                var eventStartTime = date.Date + checkIns.First().EventStart.TimeOfDay;
+                newCheckIn = await _checkInService.AdminCheckInAsync(selectedEvent.Id, student.Id, eventStartTime, useEventStartTimeInDb: false);
+            }
         }
         catch
         {

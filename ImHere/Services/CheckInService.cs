@@ -55,7 +55,7 @@ namespace ImHere.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task<CheckInDto> AdminCheckInAsync(int eventId, int studentId, DateTime date)
+        public async Task<CheckInDto> AdminCheckInAsync(int eventId, int studentId, DateTime date, bool useEventStartTimeInDb = true)
         {
             var @event = await _eventRepository.GetAsync(eventId);
             if (@event is null)
@@ -65,7 +65,7 @@ namespace ImHere.Services
             if (student is null)
                 throw new KeyNotFoundException("Couldn't find student to check in.");
 
-            var eventStartTime = date.Date + @event.Schedule.StartTime.TimeOfDay;
+            var eventStartTime = useEventStartTimeInDb ? date.Date + @event.Schedule.StartTime.TimeOfDay : date;
 
             if ((await _checkInRepository.GetAsync(eventId, studentId, eventStartTime)) != null)
                 throw new InvalidOperationException("Student cannot check in twice to the same event.");
@@ -96,9 +96,12 @@ namespace ImHere.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task<IEnumerable<CheckInDto>> GetCheckInsAsync(int eventId, DateTime eventStart)
+        public async Task<IEnumerable<CheckInDto>> GetCheckInsAsync(int eventId, DateTime eventStart, bool matchDateOnly = false)
         {
-            return (await _checkInRepository.GetAsync(c => c.EventId == eventId && c.EventStart == eventStart)).ToList().ToDto(); ;
+            if (matchDateOnly)
+                return (await _checkInRepository.GetAsync(c => c.EventId == eventId && c.EventStart.Date == eventStart.Date)).ToList().ToDto();
+            else
+                return (await _checkInRepository.GetAsync(c => c.EventId == eventId && c.EventStart == eventStart)).ToList().ToDto();
         }
 
         private DateTime currentCentralTime
