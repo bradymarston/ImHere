@@ -25,14 +25,14 @@
             <DataAnnotationsValidator />
             <div class="form-group">
                 <label for="first-name">First Name</label>
-                <InputText id="first-name" class="form-control" @bind-Value="@currentStudent.FirstName" placeholder="First Name" disabled="@duplicateExists" />
+                <InputText id="first-name" class="form-control" @bind-Value="@currentStudent.FirstName" placeholder="First Name" disabled="@(duplicateExists || isBusy)" />
                 <small class="form-text">
                     <ValidationMessage For="@(() => currentStudent.FirstName)" />
                 </small>
             </div>
             <div class="form-group">
                 <label for="last-name">Last Name</label>
-                <InputText id="last-name" class="form-control" @bind-Value="@currentStudent.LastName" placeholder="Last Name" disabled="@duplicateExists" />
+                <InputText id="last-name" class="form-control" @bind-Value="@currentStudent.LastName" placeholder="Last Name" disabled="@(duplicateExists || isBusy)" />
                 <small class="form-text">
                     <ValidationMessage For="@(() => currentStudent.LastName)" />
                 </small>
@@ -43,7 +43,7 @@
                         @foreach (var st in studentTypes)
                         {
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(currentStudent.StudentTypeId == st.Id)" @onchange="() => currentStudent.StudentTypeId = st.Id" disabled="@duplicateExists">
+                                <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(currentStudent.StudentTypeId == st.Id)" @onchange="() => currentStudent.StudentTypeId = st.Id" disabled="@(duplicateExists || isBusy)">
                                 <label class="form-check-label" for="@($"studentType{st.Id}")">
                                     @st.Description
                                 </label>
@@ -55,13 +55,13 @@
                     Are you Methodist?
                     <p class="ml-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="isMethodist" id="isMethodist" checked="@(currentStudent.IsMethodist)" @onchange="() => currentStudent.IsMethodist = true" disabled="@duplicateExists">
+                            <input class="form-check-input" type="radio" name="isMethodist" id="isMethodist" checked="@(currentStudent.IsMethodist)" @onchange="() => currentStudent.IsMethodist = true" disabled="@(duplicateExists || isBusy)">
                             <label class="form-check-label" for="isMethodist">
                                 Yes
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="isMethodist" id="notMethodist" checked="@(!currentStudent.IsMethodist)" @onchange="() => currentStudent.IsMethodist = false" disabled="@duplicateExists">
+                            <input class="form-check-input" type="radio" name="isMethodist" id="notMethodist" checked="@(!currentStudent.IsMethodist)" @onchange="() => currentStudent.IsMethodist = false" disabled="@(duplicateExists || isBusy)">
                             <label class="form-check-label" for="notMethodist">
                                 No/Prefer not to answer
                             </label>
@@ -80,23 +80,23 @@
             <div class="ml-3">
                 <div class="form-group">
                     <label for="phone">Phone Number (Optional)</label>
-                    <InputText id="phone" class="form-control" @bind-Value="@currentStudent.Phone" placeholder="(XXX) XXX-XXXX" disabled="@duplicateExists" />
+                    <InputText id="phone" class="form-control" @bind-Value="@currentStudent.Phone" placeholder="(XXX) XXX-XXXX" disabled="@(duplicateExists || isBusy)" />
                     <small class="form-text">
                         <ValidationMessage For="@(() => currentStudent.Phone)" />
                     </small>
                 </div>
                 <div class="form-group">
                     <label for="email">Email Address (Optional)</label>
-                    <InputText id="email" class="form-control" @bind-Value="@currentStudent.Email" placeholder="youraddress@domain.com" disabled="@duplicateExists" />
+                    <InputText id="email" class="form-control" @bind-Value="@currentStudent.Email" placeholder="youraddress@domain.com" disabled="@(duplicateExists || isBusy)" />
                     <small class="form-text">
                         <ValidationMessage For="@(() => currentStudent.Email)" />
                     </small>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary" disabled="@duplicateExists">
-                <span><span class="oi oi-check" aria-hidden="true"></span> @(EditingStudentId == 0 ? "Register and Check In" : " Save Changes")</span>
+            <button type="submit" class="btn btn-primary" disabled="@(duplicateExists || isBusy)">
+                <span><BusyIcon IconClass="oi-check" IsBusy="@isSubmitting" disabled="@isBusy" /> @(EditingStudentId == 0 ? "Register and Check In" : " Save Changes")</span>
             </button>
-            <NavLink href="@returnPath" class="btn btn-secondary">
+            <NavLink href="@returnPath" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
                 <span class="oi oi-x"></span> Cancel
             </NavLink>
         </EditForm>
@@ -108,11 +108,11 @@
                 Somebody has already registered under that name, please provide something to differentiate yourself from the other person (i.e., a nickname, middle name, single letter, number, random word, etc.).
             </div>
             <div class="form-group">
-                <input class="form-control" type="text" placeholder="Nickname, middle name, etc." @oninput="SetDifferentiator" />
+                <input class="form-control" type="text" placeholder="Nickname, middle name, etc." @oninput="SetDifferentiator" disabled="@isBusy" />
             </div>
 
-            <button type="button" class="btn btn-success" disabled="@string.IsNullOrWhiteSpace(currentStudent.Differentiator)" @onclick="SubmitWithDifferentiatorAsync">
-                <span class="oi oi-check" aria-hidden="true"></span> Register and Check In
+            <button type="button" class="btn btn-success" disabled="@(string.IsNullOrWhiteSpace(currentStudent.Differentiator) || isBusy)" @onclick="SubmitWithDifferentiatorAsync">
+                <BusyIcon IconClass="oi-check" IsBusy="@isSubmittingWithDiff" /> Register and Check In
             </button>
 
             @if (duplicateDifferentiator)
@@ -133,6 +133,10 @@
     private bool duplicateExists = false;
     private IEnumerable<string> differentiatorsInUse = new List<string>();
     private bool duplicateDifferentiator = false;
+
+    private bool isSubmitting = false;
+    private bool isSubmittingWithDiff = false;
+    private bool isBusy => isSubmitting || isSubmittingWithDiff;
 
     [Parameter]
     public int EventId { get; set; }
@@ -163,6 +167,9 @@
 
     private async Task SubmitAsync(EditContext context)
     {
+        if (!isSubmittingWithDiff)
+            isSubmitting = true;
+
         if (EditingStudentId == 0)
         {
             StudentDto newStudent;
@@ -174,6 +181,7 @@
             {
                 duplicateExists = true;
                 differentiatorsInUse = e.DifferentiatorsInUse;
+                isSubmitting = false;
                 return;
             }
 
@@ -216,6 +224,8 @@
             return;
         }
 
+        isSubmittingWithDiff = true;
         await SubmitAsync(null);
+        isSubmittingWithDiff = false;
     }
 }

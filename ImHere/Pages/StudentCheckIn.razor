@@ -25,11 +25,11 @@ else
         {
             <h4>Are you Methodist?</h4>
             <p />
-            <button class="btn btn-primary" @onclick="async () => await SetMethodismAsync(true)">
-                Yes, I am Methodist
+            <button class="btn btn-primary" @onclick="async () => await SetMethodismAsync(true)" disabled="@isBusy">
+                <BusyIcon IconClass="oi-check" IsBusy="@isSettingMethodismYes" /> Yes, I am Methodist
             </button>
-            <button class="btn btn-secondary" @onclick="async () => await SetMethodismAsync(false)">
-                No, I am not Methodist or I prefer not to answer
+            <button class="btn btn-secondary" @onclick="async () => await SetMethodismAsync(false)" disabled="@isBusy">
+                <BusyIcon IconClass="oi-x" IsBusy="@isSettingMethodismNo" /> No, I am not Methodist or I prefer not to answer
             </button>
         }
         else
@@ -39,10 +39,10 @@ else
                 <h4>Thank you</h4>
                 <p />
             }
-            <button type="button" class="btn btn-success" @onclick="DoCheckInAsync">
-                <span class="oi oi-check"></span> Finish Check-In to @selectedEvent.Name
+            <button type="button" class="btn btn-success" @onclick="DoCheckInAsync" disabled="@isBusy">
+                <BusyIcon IconClass="oi-check" IsBusy="@isCheckingIn" /> Finish Check-In to @selectedEvent.Name
             </button>
-            <NavLink href="" class="btn btn-secondary">
+            <NavLink href="" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
                 <span class="oi oi-x"></span> Cancel
             </NavLink>
         }
@@ -54,6 +54,12 @@ else
     public int StudentId { get; set; }
     [Parameter]
     public int EventId { get; set; }
+
+    private bool isBusy => isCheckingIn || isSettingMethodismYes || isSettingMethodismNo;
+
+    private bool isCheckingIn = false;
+    private bool isSettingMethodismYes = false;
+    private bool isSettingMethodismNo = false;
 
     private StudentDto student;
     private EventDto selectedEvent;
@@ -87,13 +93,23 @@ else
 
     private async Task SetMethodismAsync(bool isMethodist)
     {
+        if (isMethodist)
+            isSettingMethodismYes = true;
+        else
+            isSettingMethodismNo = true;
+        StateHasChanged();
         await _studentService.SetMethodismAsync(StudentId, isMethodist);
+        isSettingMethodismYes = false;
+        isSettingMethodismNo = false;
         confirmingMethodism = false;
         confirmedMethodism = true;
     }
 
     private async Task DoCheckInAsync()
     {
+
+        isCheckingIn = true;
+        StateHasChanged();
         try
         {
             await _checkInService.CheckInAsync(EventId, StudentId);
