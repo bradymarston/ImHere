@@ -31,7 +31,7 @@
             <th scope="row">@student.DisplayName</th>
             <td>@student.StudentType</td>
             <td>@student.CheckInCount</td>
-            <td>@student.LastCheckIn.ToShortDateString()</td>
+            <td>@(student.CheckInCount > 0 ? student.LastCheckIn.ToShortDateString() : "")</td>
             <td>
                 <div style="width: 12rem">
                     <NavLink href="@("/studentForm/" + student.Id)" class="btn btn-primary">
