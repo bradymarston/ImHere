@@ -54,7 +54,7 @@
                         <span class="oi oi-star" />
                     }
                 </td>
-                <th scope="row">@($"{c.Student.FirstName} {c.Student.LastName}")</th>
+                <th scope="row">@c.Student.DisplayName</th>
                 <td>@($"{c.TimeStamp.ToShortDateString()} - {c.TimeStamp.ToShortTimeString()}")</td>
                 <td>
                     <button class="btn btn-danger" @onclick="(() => confirmingRemovalId = c.Id)">
