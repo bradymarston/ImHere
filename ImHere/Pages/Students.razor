@@ -8,6 +8,39 @@
 
 <h1>Attendees</h1>
 
+<div class="row">
+    <div class="col-auto">
+        <h3>Summary</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Methodist</th>
+                    <th scope="col">Non-Methodist</th>
+                    <th scope="col">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var summary in studentSummaries)
+                {
+                    <tr>
+                        <th scope="row">@summary.TypeName</th>
+                        <td>@summary.MethodistCount</td>
+                        <td>@(summary.Count - summary.MethodistCount)</td>
+                        <td>@summary.Count</td>
+                    </tr>
+                }
+                <tr class="table-secondary">
+                    <th scope="row">Totals</th>
+                    <td>@studentSummaries.Sum(s => s.MethodistCount)</td>
+                    <td>@studentSummaries.Sum(s => s.Count - s.MethodistCount)</td>
+                    <td>@studentSummaries.Sum(s => s.Count)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div class="row sticky-top bg-white">
     <div class="col pr-0">
         <input class="form-control" type="text" placeholder="Search" @oninput="Refilter" />
@@ -72,6 +105,15 @@
     private IEnumerable<StudentOverviewRpto> filteredStudents = new List<StudentOverviewRpto>();
     private int confirmingRemovalId;
     private string searchString = "";
+
+    private IEnumerable<(string TypeName, int Count, int MethodistCount)> studentSummaries
+    {
+        get
+        {
+            var groupedStudents = students.GroupBy(s => s.StudentType);
+            return groupedStudents.Select(g => (g.Key, g.Count(), g.Where(s => s.IsMethodist).Count()));
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

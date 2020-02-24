@@ -59,6 +59,7 @@ namespace ImHere.Data.Repositories
                     StudentType = s.StudentType.Description,
                     Email = s.Email,
                     Phone = s.Phone,
+                    IsMethodist = s.IsMethodist,
                     CheckInCount = s.CheckIns.Count(),
                     FirstCheckIn = s.CheckIns.Min(c => c.TimeStamp),
                     LastCheckIn = s.CheckIns.Max(c => c.TimeStamp)

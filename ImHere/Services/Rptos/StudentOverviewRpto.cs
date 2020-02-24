@@ -16,6 +16,7 @@ namespace ImHere.Services.Rptos
         public string Email { get; set; }
         public string Phone { get; set; }
         public int CheckInCount { get; set; }
+        public bool IsMethodist { get; set; }
         public DateTime FirstCheckIn { get; set; }
         public DateTime LastCheckIn { get; set; }
 
