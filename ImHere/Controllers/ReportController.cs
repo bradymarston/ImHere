@@ -28,10 +28,10 @@ namespace ImHere.Controllers
         {
             var students = await _reportingService.GetStudentOverviewReportDataAsync(ParseDateString(startString), ParseDateString(endString) + TimeSpan.FromHours(24));
 
-            var fileContent = "First Name,Last Name,Type,Email,Phone Number,Check-In Count,First Check-In,Last Check-In\n";
+            var fileContent = "First Name,Last Name,Type,Methodist?,Email,Phone Number,Check-In Count,First Check-In,Last Check-In\n";
 
             foreach (var student in students)
-                fileContent += $"{student.FirstName},{student.LastName},{student.StudentType},{student.Email},{student.Phone},{student.CheckInCount},{(student.CheckInCount == 0 ? "" : student.FirstCheckIn.ToShortDateString())},{(student.CheckInCount == 0 ? "" : student.LastCheckIn.ToShortDateString())}\n";
+                fileContent += $"{student.FirstName},{student.LastName},{student.StudentType},{student.IsMethodist},{student.Email},{student.Phone},{student.CheckInCount},{(student.CheckInCount == 0 ? "" : student.FirstCheckIn.ToShortDateString())},{(student.CheckInCount == 0 ? "" : student.LastCheckIn.ToShortDateString())}\n";
 
             return File(Encoding.UTF8.GetBytes(fileContent), "text/csv", "studentlist.csv");
         }
