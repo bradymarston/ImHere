@@ -52,6 +52,7 @@
         <tr>
             <th scope="col">Name</th>
             <th scope="col">Type</th>
+            <th scope="col">Methodist?</th>
             <th scope="col">Check-Ins</th>
             <th scope="col">Last Check-In</th>
             <th></th>
@@ -63,6 +64,12 @@
         <tr>
             <th scope="row">@student.DisplayName</th>
             <td>@student.StudentType</td>
+            <td>
+                @if (@student.IsMethodist)
+                {
+                    <span class="oi oi-check text-success"></span>
+                }
+            </td>
             <td>@student.CheckInCount</td>
             <td>@(student.CheckInCount > 0 ? student.LastCheckIn.ToShortDateString() : "")</td>
             <td>
