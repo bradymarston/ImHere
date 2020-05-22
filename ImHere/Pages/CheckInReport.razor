@@ -7,12 +7,24 @@
 
 <h1>Event Report - Overall</h1>
 
-<p />
-<span class="oi oi-star" /> = Admin logged check-in
-<p />
 
 <div class="row">
     <div class="col-md-11 col-lg-8 col-xl-6">
+        <p />
+        <div class="row">
+            <div class="col">
+                <span class="oi oi-star" /> = Admin logged check-in
+            </div>
+            <div class="col">
+                <select class="form-control" @oninput="FilterChanged">
+                    @foreach (var e in DistinctEvents)
+                    {
+                        <option value="@e.Id">@e.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <p />
         <table class="table table-borderless">
             <thead class="thead-light">
                 <tr>
@@ -23,7 +35,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var e in Events)
+                @foreach (var e in FilteredEvents)
                 {
                     <tr @onclick="() => EventClicked(e)">
                         <td>
@@ -77,18 +89,29 @@
                         </tr>
                     }
                 }
+                <tr class="bg-light">
+                    <td></td>
+                    <td><strong>Average</strong></td>
+                    <td></td>
+                    <td><strong>@FilteredEvents.Average(e => e.CheckIns.Count()).ToString("0.0")</strong></td>
+                </tr>
             </tbody>
         </table>
+        <p />
     </div>
 </div>
 
 @code {
     public IEnumerable<EventInstanceDto> Events = new List<EventInstanceDto>();
+    public IEnumerable<EventInstanceDto> FilteredEvents = new List<EventInstanceDto>();
+    public IList<(int Id, string Name)> DistinctEvents = new List<(int Id, string Name)>();
     public EventInstanceDto SelectedEvent { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        Events = (await _reportingService.GetEventInstancesAsync()).OrderByDescending(e => e.InstanceStart);
+        FilteredEvents = Events = (await _reportingService.GetEventInstancesAsync()).OrderByDescending(e => e.InstanceStart);
+        DistinctEvents = Events.GroupBy(e => e.EventId).Select(g => (g.First().EventId, g.First().Name)).OrderBy(d => d.Name).ToList();
+        DistinctEvents.Insert(0, (0, "All Events"));
 
         await base.OnInitializedAsync();
     }
@@ -103,5 +126,18 @@
         var counts = testEvent.CheckIns.GroupBy(c => c.Student.StudentTypeId).ToDictionary(g => g.First().Student.StudentTypeDescription, g => g.Count());
 
         return counts;
+    }
+
+    private void FilterChanged(ChangeEventArgs args)
+    {
+        var newFilter = int.Parse((string)args.Value);
+
+        if (newFilter == 0)
+            FilteredEvents = Events;
+        else
+            FilteredEvents = Events.Where(e => e.EventId == newFilter);
+
+        if (!FilteredEvents.Contains(SelectedEvent))
+            SelectedEvent = null;
     }
 }
