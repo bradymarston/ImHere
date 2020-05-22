@@ -3,6 +3,7 @@
 
 @using ImHere.Services
 @inject ReportingService _reportingService
+@inject EventService _eventService 
 
 <h1>Statistical Report</h1>
 
@@ -15,12 +16,21 @@
         <label for="end-date">End Date</label>
         <input type="date" id="end-date" class="form-control" @bind-value="End" />
     </div>
-
-    <div>
-        <button class="btn btn-primary" @onclick="GenerateReportAsync">
-            Update Report
-        </button>
-    </div>
+</div>
+<div class="form-group col-md-11 col-lg-8 col-xl-6">
+    <label for="event-filter">Event to Show</label>
+    <select class="form-control" @oninput="FilterChanged">
+        <option value="0">All Events</option>
+        @foreach (var e in DistinctEvents)
+        {
+            <option value="@e.Id">@e.Name</option>
+        }
+    </select>
+</div>
+<div>
+    <button class="btn btn-primary" @onclick="GenerateReportAsync">
+        Update Report
+    </button>
 </div>
 <p />
 <div class="form-row col-md-11 col-lg-8 col-xl-6">
@@ -32,6 +42,16 @@
                 <div>@($"{count.Key}: {count.Value}")</div>
             }
         </p>
+        @if (EventInstanceCount > 0)
+        {
+            <p>
+                <strong>Attendance Average: @((CheckInCounts.Sum(c => c.Value) / (double)EventInstanceCount).ToString("0.0"))</strong>
+                @foreach (var count in CheckInCounts)
+                {
+                    <div>@($"{count.Key}: {(count.Value / (double)EventInstanceCount).ToString("0.0")}")</div>
+                }
+            </p>
+        }
         <p>
             <strong>Attendance Total: @CheckInCounts.Sum(c => c.Value)</strong>
             @foreach (var count in CheckInCounts)
@@ -48,6 +68,9 @@
 @code {
     public IDictionary<string, int> CheckInCounts { get; set; }
     public IDictionary<string, int> UniqueStudentCounts { get; set; }
+    public IList<(int Id, string Name)> DistinctEvents = new List<(int Id, string Name)>();
+    public int EventIdFilter { get; set; }
+    public int EventInstanceCount { get; set; }
 
     private string urlDateRangeSegment = "";
 
@@ -88,6 +111,8 @@
         Start = new DateTime(schoolStartYear, 8, 1);
         End = Start + TimeSpan.FromDays(365);
 
+        DistinctEvents = (await _eventService.GetEventsAsync()).Select(e => (e.Id, e.Name)).OrderBy(e => e.Name).ToList();
+
         await GenerateReportAsync();
 
         await base.OnInitializedAsync();
@@ -96,12 +121,18 @@
     private async Task GenerateReportAsync()
     {
         var normalizedEnd = End + TimeSpan.FromDays(1);
-        CheckInCounts = await _reportingService.GetCheckInCountsAsync(Start, normalizedEnd);
-        UniqueStudentCounts = await _reportingService.GetUniqueStudentCountsAsync(Start, normalizedEnd);
+        CheckInCounts = await _reportingService.GetCheckInCountsAsync(Start, normalizedEnd, EventIdFilter);
+        UniqueStudentCounts = await _reportingService.GetUniqueStudentCountsAsync(Start, normalizedEnd, EventIdFilter);
+        EventInstanceCount = await _reportingService.GetEventInstanceCountAsync(Start, normalizedEnd, EventIdFilter);
     }
 
     private void UpdateUrls()
     {
         urlDateRangeSegment = $"/{Start.Month}-{Start.Day}-{Start.Year}/{End.Month}-{End.Day}-{End.Year}";
+    }
+
+    private void FilterChanged(ChangeEventArgs args)
+    {
+        EventIdFilter = int.Parse((string)args.Value);
     }
 }

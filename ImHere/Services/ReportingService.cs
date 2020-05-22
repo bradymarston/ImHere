@@ -29,14 +29,19 @@ namespace ImHere.Services
             return checkIns.ToEventInstanceDto();
         }
 
-        public async Task<IDictionary<string, int>> GetCheckInCountsAsync(DateTime start, DateTime end)
+        public async Task<IDictionary<string, int>> GetCheckInCountsAsync(DateTime start, DateTime end, int eventId)
         {
-            return await _checkInRepository.GetCheckInCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end);
+            return await _checkInRepository.GetCheckInCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && (eventId == 0 || c.EventId == eventId));
         }
 
-        public async Task<IDictionary<string, int>> GetUniqueStudentCountsAsync(DateTime start, DateTime end)
+        public async Task<IDictionary<string, int>> GetUniqueStudentCountsAsync(DateTime start, DateTime end, int eventId)
         {
-            return await _checkInRepository.GetUniqueStudentCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end);
+            return await _checkInRepository.GetUniqueStudentCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && (eventId == 0 || c.EventId == eventId));
+        }
+
+        public async Task<int> GetEventInstanceCountAsync(DateTime start, DateTime end, int eventId)
+        {
+            return await _checkInRepository.GetEventInstanceCountAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && (eventId == 0 || c.EventId == eventId));
         }
 
         public async Task<IEnumerable<StudentOverviewRpto>> GetStudentOverviewReportDataAsync(DateTime start, DateTime end)

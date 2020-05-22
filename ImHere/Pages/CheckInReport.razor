@@ -17,9 +17,10 @@
             </div>
             <div class="col">
                 <select class="form-control" @oninput="FilterChanged">
+                    <option value="0">All Events</option>
                     @foreach (var e in DistinctEvents)
                     {
-                        <option value="@e.Id">@e.Name</option>
+                    <option value="@e.Id">@e.Name</option>
                     }
                 </select>
             </div>
@@ -111,7 +112,6 @@
     {
         FilteredEvents = Events = (await _reportingService.GetEventInstancesAsync()).OrderByDescending(e => e.InstanceStart);
         DistinctEvents = Events.GroupBy(e => e.EventId).Select(g => (g.First().EventId, g.First().Name)).OrderBy(d => d.Name).ToList();
-        DistinctEvents.Insert(0, (0, "All Events"));
 
         await base.OnInitializedAsync();
     }
