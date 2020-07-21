@@ -339,3 +339,4 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /ImHere/ImHere.db
+/ImHere/ImHere.db.bak
