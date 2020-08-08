@@ -19,6 +19,7 @@ namespace ImHere.Services.Mappers
                 Id = student.Id,
                 StudentTypeId = student.StudentTypeId,
                 IsMethodist = student.IsMethodist,
+                LocalChurch = student.LocalChurch,
                 FirstName = student.FirstName,
                 LastName = student.LastName,
                 Differentiator = student.Differentiator,
@@ -43,6 +44,7 @@ namespace ImHere.Services.Mappers
                 Id = studentDto.Id,
                 StudentTypeId = studentDto.StudentTypeId,
                 IsMethodist = studentDto.IsMethodist,
+                LocalChurch = studentDto.LocalChurch,
                 FirstName = studentDto.FirstName,
                 LastName = studentDto.LastName,
                 Differentiator = studentDto.Differentiator,
@@ -63,6 +65,7 @@ namespace ImHere.Services.Mappers
             student.Email = studentDto.Email;
             student.StudentTypeId = studentDto.StudentTypeId;
             student.IsMethodist = studentDto.IsMethodist;
+            student.LocalChurch = studentDto.LocalChurch;
         }
 
 
