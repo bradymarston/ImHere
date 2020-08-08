@@ -98,6 +98,13 @@ namespace ImHere.Services
             await UpdateStudent(studentInDb);
         }
 
+        public async Task SetLocalChurchAsync(int studentId, LocalChurch localChurch)
+        {
+            var studentInDb = await GetStudentAsync(studentId);
+            studentInDb.LocalChurch = localChurch;
+            await UpdateStudent(studentInDb);
+        }
+
         public async Task<StudentDto> UpdateStudent(StudentDto studentDto)
         {
             if (studentDto is null)

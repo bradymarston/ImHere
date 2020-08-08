@@ -2,6 +2,7 @@
 
 @using ImHere.Services
 @using ImHere.Services.Dtos
+@using ImHere.Data.Models
 
 @inject StudentService _studentService
 @inject EventService  _eventService
@@ -31,20 +32,49 @@ else
             <button class="btn btn-secondary" @onclick="async () => await SetMethodismAsync(false)" disabled="@isBusy">
                 <BusyIcon IconClass="oi-x" IsBusy="@isSettingMethodismNo" /> No, I am not Methodist or I prefer not to answer
             </button>
+            <p></p>
+            <div>
+                <NavLink href="" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
+                    <span class="oi oi-x"></span> Cancel
+                </NavLink>
+            </div>
         }
         else
         {
-            @if (confirmedMethodism)
+            if (settingLocalChurch)
             {
-                <h4>Thank you</h4>
+                <h4>Do you attend a local church</h4>
                 <p />
+                <button class="btn btn-primary" @onclick="async () => await SetLocalChurchAsync(LocalChurch.Methodist)" disabled="@isBusy">
+                    <BusyIcon IconClass="oi-check" IsBusy="@isSettingLocalChurchMethodist" /> Yes, a Methodist church
+                </button>
+                <button class="btn btn-primary" @onclick="async () => await SetLocalChurchAsync(LocalChurch.NonMethodist)" disabled="@isBusy">
+                    <BusyIcon IconClass="oi-check" IsBusy="@isSettingLocalChurchNonMethodist" /> Yes, a non-Methodist church
+                </button>
+                <button class="btn btn-secondary" @onclick="async () => await SetLocalChurchAsync(LocalChurch.None)" disabled="@isBusy">
+                    <BusyIcon IconClass="oi-x" IsBusy="@isSettingLocalChurchNone" /> No, or I prefer not to answer
+                </button>
+                <p></p>
+                <div>
+                    <NavLink href="" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
+                        <span class="oi oi-x"></span> Cancel
+                    </NavLink>
+                </div>
             }
-            <button type="button" class="btn btn-success" @onclick="DoCheckInAsync" disabled="@isBusy">
-                <BusyIcon IconClass="oi-check" IsBusy="@isCheckingIn" /> Finish Check-In to @selectedEvent.Name
-            </button>
-            <NavLink href="" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
-                <span class="oi oi-x"></span> Cancel
-            </NavLink>
+            else
+            {
+                @if (confirmedMethodism || didSetLocalChurch)
+                {
+                    <h4>Thank you</h4>
+                    <p />
+                }
+                <button type="button" class="btn btn-success" @onclick="DoCheckInAsync" disabled="@isBusy">
+                    <BusyIcon IconClass="oi-check" IsBusy="@isCheckingIn" /> Finish Check-In to @selectedEvent.Name
+                </button>
+                <NavLink href="" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
+                    <span class="oi oi-x"></span> Cancel
+                </NavLink>
+            }
         }
     }
 }
@@ -55,17 +85,23 @@ else
     [Parameter]
     public int EventId { get; set; }
 
-    private bool isBusy => isCheckingIn || isSettingMethodismYes || isSettingMethodismNo;
+    private bool isBusy => isCheckingIn || isSettingMethodismYes || isSettingMethodismNo || isSettingLocalChurchMethodist || isSettingLocalChurchNonMethodist || isSettingLocalChurchNone;
 
     private bool isCheckingIn = false;
     private bool isSettingMethodismYes = false;
     private bool isSettingMethodismNo = false;
+    private bool isSettingLocalChurchMethodist = false;
+    private bool isSettingLocalChurchNonMethodist = false;
+    private bool isSettingLocalChurchNone = false;
 
     private StudentDto student;
     private EventDto selectedEvent;
 
     private bool confirmingMethodism = false;
     private bool confirmedMethodism = false;
+
+    private bool settingLocalChurch = false;
+    private bool didSetLocalChurch = false;
 
     protected async override Task OnParametersSetAsync()
     {
@@ -83,9 +119,18 @@ else
                 if (oldestCheckIn.TimeStamp < new DateTime(2020, 1, 17))
                 {
                     confirmingMethodism = true;
-                    return;
                 }
             }
+
+            if (newestCheckIn.TimeStamp < new DateTime(2020, 8, 7))
+            {
+                settingLocalChurch = true;
+            }
+        }
+        else
+        {
+            confirmingMethodism = true;
+            settingLocalChurch = true;
         }
 
         await base.OnParametersSetAsync();
@@ -103,6 +148,30 @@ else
         isSettingMethodismNo = false;
         confirmingMethodism = false;
         confirmedMethodism = true;
+    }
+
+    private async Task SetLocalChurchAsync(LocalChurch localChurch)
+    {
+        switch (localChurch)
+        {
+            case LocalChurch.Methodist:
+                isSettingLocalChurchMethodist = true;
+                break;
+            case LocalChurch.NonMethodist:
+                isSettingLocalChurchNonMethodist = true;
+                break;
+            default:
+                isSettingLocalChurchNone = true;
+                break;
+        }
+        StateHasChanged();
+        await _studentService.SetLocalChurchAsync(StudentId, localChurch);
+        isSettingLocalChurchMethodist = false;
+        isSettingLocalChurchNonMethodist = false;
+        isSettingLocalChurchNonMethodist = false;
+        settingLocalChurch = false;
+        didSetLocalChurch = true;
+
     }
 
     private async Task DoCheckInAsync()
