@@ -114,6 +114,18 @@ namespace ImHere.Services
             return (await _checkInRepository.GetFirstStudentCheckInAsync(studentId))?.ToDto();
         }
 
+        public async Task TransferCheckInsAsync(int sourceEventId, int targetEventId)
+        {
+            var checkIns = (await _checkInRepository.GetAsync(c => c.EventId == sourceEventId, false)).ToList();
+
+
+            await Task.Delay(1);
+            foreach (var checkIn in checkIns)
+                checkIn.EventId = targetEventId;
+
+            await _unitOfWork.CompleteAsync();
+        }
+
         private DateTime currentCentralTime
         {
             get

@@ -1,0 +1,143 @@
+﻿@page "/eventcombine/{eventId}"
+@attribute [Authorize]
+
+@using ImHere.Services.Dtos
+@using ImHere.Services
+
+@inject EventService _eventService
+@inject CheckInService _checkInService
+
+<h1>Combine Events</h1>
+
+@if (eventNotFound)
+{
+    <p>No event found</p>
+}
+else
+{
+    if (!isComplete)
+    {
+        <p>Combine <strong>@(targetEvent.Name)</strong> with:</p>
+
+        <select class="form-control" @bind="SourceEventId" disabled="@isConfirming">
+            <option value="0" disabled>Select an event...</option>
+            @foreach (var eventOption in availableEvents)
+            {
+                <option value="@(eventOption.Id)">@(eventOption.Name)</option>
+            }
+        </select>
+        <p></p>
+
+        if (!(sourceEvent is null))
+        {
+            <p>
+                All check-ins will be moved from <strong>@(sourceEvent.Name)</strong> to <strong>@(targetEvent.Name)</strong> and <strong>@(sourceEvent.Name)</strong> will be deleted.
+            </p>
+
+            <button type="button" class="btn btn-success" disabled="@isConfirming" @onclick="() => isConfirming = true">
+                <span class="oi oi-check" aria-hidden="true"></span> Combine
+            </button>
+        }
+
+        <NavLink href="/events" class="btn btn-secondary" hidden="@isBusy">
+            <span class="oi oi-x" aria-hidden="true"></span> Cancel
+        </NavLink>
+
+        if (isConfirming)
+        {
+            <p></p>
+            <p>
+                Are you sure?
+            </p>
+            <button class="btn btn-success" @onclick="DoCombine" disabled="@isBusy">
+                <BusyIcon IconClass="oi-check" IsBusy="@isBusy" /> Yes
+            </button>
+            <button class="btn btn-danger" @onclick="() => isConfirming = false" disabled="@isBusy">
+                <span class="oi oi-x"></span> No
+            </button>
+        }
+    }
+    else
+    {
+        <p>
+            Combination @(!hasFailed ? "completed" : "failed").
+        </p>
+        <NavLink href="/events" class="btn btn-secondary">
+            <span class="oi oi-arrow-thick-left"></span> Go Back to Events
+        </NavLink>
+    }
+}
+
+@code {
+    private EventDto targetEvent = new EventDto();
+    private EventDto sourceEvent = null;
+    private IEnumerable<EventDto> availableEvents = new List<EventDto>();
+    private bool eventNotFound = false;
+    private bool isBusy = false;
+    private bool isConfirming = false;
+    private bool isComplete = false;
+    private bool hasFailed = false;
+
+    [Parameter]
+    public string EventId { get; set; }
+
+    public int SourceEventId
+    {
+        get
+        {
+            return sourceEvent is null ? 0 : sourceEvent.Id;
+        }
+        set
+        {
+            sourceEvent = availableEvents.FirstOrDefault(e => e.Id == value);
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        int eventId;
+
+        if (int.TryParse(EventId, out eventId))
+        {
+            targetEvent = await _eventService.GetEventAsync(eventId);
+
+            if (targetEvent is null)
+            {
+                eventNotFound = true;
+                return;
+            }
+        }
+        else
+        {
+            eventNotFound = true;
+            return;
+        }
+
+        availableEvents = (await _eventService.GetEventsAsync()).Where(e => e.Id != eventId);
+    }
+
+    private async Task DoCombine()
+    {
+        isBusy = true;
+        try
+        {
+            await _checkInService.TransferCheckInsAsync(sourceEvent.Id, targetEvent.Id);
+        }
+        catch
+        {
+            hasFailed = true;
+            isComplete = true;
+            return;
+        }
+
+        try
+        {
+            await _eventService.RemoveEvent(sourceEvent);
+        }
+        catch
+        {
+            hasFailed = true;
+        }
+        isComplete = true;
+    }
+}

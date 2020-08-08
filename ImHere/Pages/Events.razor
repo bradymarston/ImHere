@@ -54,6 +54,9 @@
                                 <span class="oi oi-x"></span> Remove
                             </button>
                         }
+                        <NavLink href="@("/eventCombine/" + e.Id)" class="btn btn-info">
+                            <span class="oi oi-transfer" aria-hidden="true"></span> Combine
+                        </NavLink>
                     </div>
                     @if (e.Id == confirmingRemovalId)
                     {
