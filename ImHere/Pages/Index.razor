@@ -1,5 +1,8 @@
 ﻿@page "/"
+@page "/index"
+@page "/kiosk"
 @page "/index/{LoadEventId:int}"
+@page "/kiosk/{LoadEventId:int}"
 
 @using ImHere.Services
 @using ImHere.Services.Dtos
@@ -16,57 +19,57 @@
         <div class="row">
             <div class="col-md-10 col-lg-8 col-xl-6">
                 @if (events.Count() == 0)
-        {
-                <h3>No currently active event available for check-in.</h3>
-        }
-        else
-        {
-                @if (events.Count() == 1)
-            {
-                <h1>Welcome to @events.First().Name</h1>
-            }
-            else
-            {
-                <h3>Select an event to check-in:</h3>
-                <p></p>
-                <select class="form-control" @bind="SelectedEventId">
-                    @foreach (var e in events)
+                {
+                    <h3>No currently active event available for check-in.</h3>
+                }
+                else
+                {
+                    @if (events.Count() == 1)
                     {
-                    <option value="@e.Id">@e.Name</option>
+                        <h1>Welcome to @events.First().Name</h1>
                     }
-                </select>
-                <p></p>
-            }
+                    else
+                    {
+                        <h3>Select an event to check-in:</h3>
+                        <p></p>
+                        <select class="form-control" @bind="SelectedEventId">
+                            @foreach (var e in events)
+                            {
+                                <option value="@e.Id">@e.Name</option>
+                            }
+                        </select>
+                        <p></p>
+                    }
 
-                @if (currentEvent.Id != 0)
-            {
-                <h3>Select your name below:</h3>
-                <div class="row sticky-top bg-white">
-                    <div class="col pr-0">
+                    @if (currentEvent.Id != 0)
+                    {
+                        <h3>Select your name below:</h3>
+                        <div class="row sticky-top bg-white">
+                            <div class="col pr-0">
+                                <p></p>
+                                <input class="form-control" type="text" placeholder="Search" @oninput="Refilter" @onkeypress="KeyPressed" />
+                            </div>
+                            <div class="col-auto">
+                                <p></p>
+                                <NavLink href="@($"{(isKiosk ? "/kiosk" : "")}/newstudent/{SelectedEventId}")" class="btn btn-success">
+                                    First Time Checking In?
+                                </NavLink>
+                            </div>
+                        </div>
                         <p></p>
-                        <input class="form-control" type="text" placeholder="Search" @oninput="Refilter" @onkeypress="KeyPressed" />
-                    </div>
-                    <div class="col-auto">
-                        <p></p>
-                        <NavLink href="@($"newstudent/{SelectedEventId}")" class="btn btn-success">
-                            First Time Checking In?
-                        </NavLink>
-                    </div>
-                </div>
-                <p></p>
-                <table class="table table-hover" style="cursor: pointer;">
-                    <tbody>
-                        @foreach (var student in filteredStudents)
-                        {
-                        <tr @onclick="@(() => StudentSelected(student))">
-                            <td>@student.DisplayName</td>
-                            <td class="text-right text-muted">@student.StudentTypeDescription</td>
-                        </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-        }
+                        <table class="table table-hover" style="cursor: pointer;">
+                            <tbody>
+                                @foreach (var student in filteredStudents)
+                                {
+                                    <tr @onclick="@(() => StudentSelected(student))">
+                                        <td>@student.DisplayName</td>
+                                        <td class="text-right text-muted">@student.StudentTypeDescription</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
             </div>
         </div>
     </NotAuthorized>
@@ -111,11 +114,14 @@
     private IEnumerable<StudentDto> filteredStudents = new List<StudentDto>();
     private IEnumerable<EventDto> events = new List<EventDto>();
     private EventDto currentEvent = new EventDto();
+    private bool isKiosk = false;
 
     private string searchString = "";
 
     protected async override Task OnInitializedAsync()
     {
+        isKiosk = _navigationManager.Uri.ToLower().Contains("kiosk");
+
         var authState = await authenticationStateTask;
 
         if (authState.User.Identity.IsAuthenticated)
@@ -175,7 +181,7 @@
 
     private void StudentSelected(StudentDto student)
     {
-        _navigationManager.NavigateTo("/studentcheckin/" + student.Id + "/" + currentEvent.Id);
+        _navigationManager.NavigateTo((isKiosk ? "/kiosk" : "") + "/studentcheckin/" + student.Id + "/" + currentEvent.Id);
     }
 
     private void KeyPressed(KeyboardEventArgs e)

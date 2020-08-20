@@ -1,4 +1,5 @@
 ﻿@page "/studentcheckin/{StudentId:int}/{EventId:int}"
+@page "/kiosk/studentcheckin/{StudentId:int}/{EventId:int}"
 
 @using ImHere.Services
 @using ImHere.Services.Dtos
@@ -34,7 +35,7 @@ else
             </button>
             <p></p>
             <div>
-                <NavLink href="" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
+                <NavLink href="@($"/{(isKiosk ? "kiosk" : "index")}/{EventId}")" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
                     <span class="oi oi-x"></span> Cancel
                 </NavLink>
             </div>
@@ -56,7 +57,7 @@ else
                 </button>
                 <p></p>
                 <div>
-                    <NavLink href="" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
+                    <NavLink href="@($"/{(isKiosk ? "kiosk" : "index")}/{EventId}")" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
                         <span class="oi oi-x"></span> Cancel
                     </NavLink>
                 </div>
@@ -71,7 +72,7 @@ else
                 <button type="button" class="btn btn-success" @onclick="DoCheckInAsync" disabled="@isBusy">
                     <BusyIcon IconClass="oi-check" IsBusy="@isCheckingIn" /> Finish Check-In to @selectedEvent.Name
                 </button>
-                <NavLink href="" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
+                <NavLink href="@($"/{(isKiosk ? "kiosk" : "index")}/{EventId}")" class="@($"btn btn-secondary {(isBusy ? "disabled" : "")}")">
                     <span class="oi oi-x"></span> Cancel
                 </NavLink>
             }
@@ -87,6 +88,7 @@ else
 
     private bool isBusy => isCheckingIn || isSettingMethodismYes || isSettingMethodismNo || isSettingLocalChurchMethodist || isSettingLocalChurchNonMethodist || isSettingLocalChurchNone;
 
+    private bool isKiosk = false;
     private bool isCheckingIn = false;
     private bool isSettingMethodismYes = false;
     private bool isSettingMethodismNo = false;
@@ -103,8 +105,11 @@ else
     private bool settingLocalChurch = false;
     private bool didSetLocalChurch = false;
 
+
     protected async override Task OnParametersSetAsync()
     {
+        isKiosk = _navigationManager.Uri.ToLower().Contains("kiosk");
+
         student = await _studentService.GetStudentAsync(StudentId);
         selectedEvent = await _eventService.GetEventAsync(EventId);
 
@@ -168,7 +173,7 @@ else
         await _studentService.SetLocalChurchAsync(StudentId, localChurch);
         isSettingLocalChurchMethodist = false;
         isSettingLocalChurchNonMethodist = false;
-        isSettingLocalChurchNonMethodist = false;
+        isSettingLocalChurchNone = false;
         settingLocalChurch = false;
         didSetLocalChurch = true;
 
@@ -185,12 +190,12 @@ else
         }
         catch
         {
-            _navigationManager.NavigateTo("/checkinfailed");
+            _navigationManager.NavigateTo((isKiosk ? "/kiosk" : "") + "/checkinfailed/" + EventId);
             return;
         }
 
-        var successUrl = (selectedEvent.RequireConfirmation ? "/checkinconfirm/" : "/index/") + EventId;
+        var successPath = (isKiosk ? "kiosk" : (selectedEvent.RequireConfirmation ? "checkinconfirm" : "index"));
 
-        _navigationManager.NavigateTo(successUrl);
+        _navigationManager.NavigateTo($"/{successPath}/{EventId}");
     }
 }

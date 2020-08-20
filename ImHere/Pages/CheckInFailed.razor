@@ -1,15 +1,28 @@
 ﻿@page "/checkinfailed/{LoadEventId:int}"
+@page "/kiosk/checkinfailed/{LoadEventId:int}"
+
+@inject NavigationManager  _navigationManager
 
 <h1>Check In Failed</h1>
 
 <p></p>
 
-<NavLink class="btn btn-secondary" href="@($"/index/{LoadEventId}")">
+<NavLink class="btn btn-secondary" href="@($"/{(isKiosk ? "kiosk" : "index")}/{LoadEventId}")">
     Return To Home
 </NavLink>
 
 @code {
+    private bool isKiosk = false;
+
     [Parameter]
     public int LoadEventId { get; set; }
+
+    protected override void OnInitialized()
+    {
+        isKiosk = _navigationManager.Uri.ToLower().Contains("kiosk");
+
+
+        base.OnInitialized();
+    }
 }
 

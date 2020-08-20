@@ -1,5 +1,6 @@
 ﻿@page "/studentform/{EditingStudentId:int}"
 @page "/newstudent/{EventId:int}"
+@page "/kiosk/newstudent/{EventId:int}"
 
 @using ImHere.Services.Dtos
 @using ImHere.Services
@@ -8,6 +9,7 @@
 
 @inject StudentService _studentService
 @inject CheckInService  _checkInService
+@inject EventService _eventService 
 @inject NavigationManager _navigationManager
 
 <div class="row">
@@ -41,14 +43,14 @@
                 <div class="col-md-6">
                     <p class="ml-3">
                         @foreach (var st in studentTypes)
-                                {
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(currentStudent.StudentTypeId == st.Id)" @onchange="() => currentStudent.StudentTypeId = st.Id" disabled="@(duplicateExists || isBusy)">
-                            <label class="form-check-label" for="@($"studentType{st.Id}")">
-                                @st.Description
-                            </label>
-                        </div>
-                                }
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="studentType" id="@($"studentType{st.Id}")" checked="@(currentStudent.StudentTypeId == st.Id)" @onchange="() => currentStudent.StudentTypeId = st.Id" disabled="@(duplicateExists || isBusy)">
+                                <label class="form-check-label" for="@($"studentType{st.Id}")">
+                                    @st.Description
+                                </label>
+                            </div>
+                        }
                     </p>
                 </div>
                 <div class="col-md-6">
@@ -158,6 +160,7 @@
     private bool duplicateExists = false;
     private IEnumerable<string> differentiatorsInUse = new List<string>();
     private bool duplicateDifferentiator = false;
+    private bool isKiosk = false;
 
     private bool isSubmitting = false;
     private bool isSubmittingWithDiff = false;
@@ -190,6 +193,16 @@
         await base.OnInitializedAsync();
     }
 
+    protected override void OnParametersSet()
+    {
+        isKiosk = _navigationManager.Uri.ToLower().Contains("kiosk");
+
+        if (EditingStudentId == 0)
+        {
+            returnPath = $"/{(isKiosk ? "kiosk" : "index")}/{(EventId > 0 ? EventId.ToString() : "")}";
+        }
+    }
+
     private async Task SubmitAsync(EditContext context)
     {
         if (!isSubmittingWithDiff)
@@ -219,11 +232,15 @@
                 }
                 catch
                 {
-                    _navigationManager.NavigateTo("/checkinfailed");
+                    _navigationManager.NavigateTo($"{(isKiosk ? "/kiosk" : "")}/checkinfailed");
                     return;
                 }
 
-                _navigationManager.NavigateTo("/index/" + EventId);
+                var selectedEvent = await _eventService.GetEventAsync(EventId);
+
+                var successPath = (isKiosk ? "kiosk" : (selectedEvent.RequireConfirmation ? "checkinconfirm" : "index"));
+
+                _navigationManager.NavigateTo($"/{successPath}/{EventId}");
             }
             else
                 _navigationManager.NavigateTo(returnPath);
