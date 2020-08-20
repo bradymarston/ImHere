@@ -12,6 +12,7 @@ namespace ImHere.Services.Dtos
 
         [Required]
         public string Name { get; set; }
+        public bool RequireConfirmation { get; set; }
 
         public EventScheduleInfoDtoBase Schedule { get; set; } = new OneTimeScheduleInfoDto();
         public bool Suspended { get; set; }

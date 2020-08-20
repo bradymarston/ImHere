@@ -1,13 +1,15 @@
-﻿@page "/checkinfailed"
+﻿@page "/checkinfailed/{LoadEventId:int}"
 
 <h1>Check In Failed</h1>
 
 <p></p>
 
-<NavLink class="btn btn-secondary" href="/">
+<NavLink class="btn btn-secondary" href="@($"/index/{LoadEventId}")">
     Return To Home
 </NavLink>
 
 @code {
-
+    [Parameter]
+    public int LoadEventId { get; set; }
 }
+

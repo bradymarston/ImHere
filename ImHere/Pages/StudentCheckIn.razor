@@ -43,7 +43,7 @@ else
         {
             if (settingLocalChurch)
             {
-                <h4>Do you attend a local church</h4>
+                <h4>Do you attend a local church?</h4>
                 <p />
                 <button class="btn btn-primary" @onclick="async () => await SetLocalChurchAsync(LocalChurch.Methodist)" disabled="@isBusy">
                     <BusyIcon IconClass="oi-check" IsBusy="@isSettingLocalChurchMethodist" /> Yes, a Methodist church
@@ -189,6 +189,8 @@ else
             return;
         }
 
-        _navigationManager.NavigateTo("/index/" + EventId);
+        var successUrl = (selectedEvent.RequireConfirmation ? "/checkinconfirm/" : "/index/") + EventId;
+
+        _navigationManager.NavigateTo(successUrl);
     }
 }

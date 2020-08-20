@@ -18,6 +18,7 @@ namespace ImHere.Services.Mappers
             {
                 Id = @event.Id,
                 Name = @event.Name,
+                RequireConfirmation = @event.RequireConfirmation,
                 Suspended = @event.Suspended
             };
 
@@ -83,6 +84,7 @@ namespace ImHere.Services.Mappers
             {
                 Id = eventDto.Id,
                 Name = eventDto.Name,
+                RequireConfirmation = eventDto.RequireConfirmation,
                 Suspended = eventDto.Suspended
             };
 
@@ -141,6 +143,7 @@ namespace ImHere.Services.Mappers
                 return;
 
             @event.Name = eventDto.Name;
+            @event.RequireConfirmation = eventDto.RequireConfirmation;
 
             switch (eventDto.Schedule)
             {

@@ -75,6 +75,10 @@
                         </InputSelect>
                     </div>
                 }
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="requireConfirmation" @bind-value="@currentEvent.RequireConfirmation">
+                    <label class="form-check-label" for="requireConfirmation">Require Confirmation Page</label>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">
                 @if (currentEvent.Id == 0)

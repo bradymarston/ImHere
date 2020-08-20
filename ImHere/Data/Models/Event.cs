@@ -12,6 +12,7 @@ namespace ImHere.Data.Models
         [Required]
         public string Name { get; set; }
         public EventScheduleInfoBase Schedule { get; set; } = new OneTimeScheduleInfo();
+        public bool RequireConfirmation { get; set; }
         public bool Suspended { get; set; }
         public IEnumerable<CheckIn> CheckIns { get; set; } = new List<CheckIn>();
     }

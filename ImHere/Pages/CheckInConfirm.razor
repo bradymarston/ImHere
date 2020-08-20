@@ -1,0 +1,21 @@
+﻿@page "/checkinconfirm/{LoadEventId:int}"
+
+<h1>Thank You!</h1>
+
+<p></p>
+
+<h2>Check-in Confirmation</h2>
+<p></p>
+
+<div>Please keep this page open to show to a Wesley House volunteer or staff member.</div>
+
+<p></p>
+
+<NavLink class="btn btn-primary" href="@($"/index/{LoadEventId}")">
+    I've shown my confirmation page
+</NavLink>
+
+@code {
+    [Parameter]
+    public int LoadEventId { get; set; }
+}
