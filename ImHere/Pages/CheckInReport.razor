@@ -33,6 +33,7 @@
                     <th scope="col">Event Name</th>
                     <th scope="col">Date</th>
                     <th scope="col"># Checked In</th>
+                    <th scpoe="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -45,6 +46,11 @@
                         <th scope="row">@e.Name</th>
                         <td>@e.InstanceStart.ToShortDateString()</td>
                         <td>@e.CheckIns.Count()</td>
+                        <td>
+                            <a class="btn btn-secondary" href="@($"api/report/checkins/{e.EventId}/{e.InstanceStart.ToString("M-d-yyyy-H-m-s")}")">
+                                <span class="oi oi-list"></span>
+                            </a>
+                        </td>
                     </tr>
                     @if (e == SelectedEvent)
                     {

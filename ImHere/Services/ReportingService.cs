@@ -48,5 +48,10 @@ namespace ImHere.Services
         {
             return await _studentRepository.GetStudentReportDataAsync(start, end);
         }
+
+        public async Task<IEnumerable<CheckInDto>> GetEventCheckInReportDataAsync(int eventId, DateTime eventStart)
+        {
+            return (await _checkInRepository.GetAsync(c => c.EventId == eventId && c.EventStart == eventStart, true)).ToDto();
+        }
     }
 }
