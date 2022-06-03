@@ -17,19 +17,45 @@
         <input type="date" id="end-date" class="form-control" @bind-value="End" />
     </div>
 </div>
-<div class="form-group col-md-11 col-lg-8 col-xl-6">
-    <label for="event-filter">Event to Show</label>
-    <select class="form-control" @oninput="FilterChanged">
-        <option value="0">All Events</option>
-        @foreach (var e in DistinctEvents)
-        {
-            <option value="@e.Id">@e.Name</option>
-        }
-    </select>
+<div class="form-row col-md-11 col-lg-8 col-xl-6">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Available Events</h5>
+                <p class="card-text">(Click to add)</p>
+                <div class="list-group">
+                    @foreach (var e in DistinctEvents.Where(e => !SelectedEvents.Contains(e)))
+                    {
+                      <button type="button" @onclick="() => {
+                          SelectedEvents.Add(e);
+                          UpdateUrls();
+                      }" class="list-group-item list-group-item-action">@e.Name</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Selected Events</h5>
+                <p class="card-text">(Click to remove)</p>
+                <div class="list-group">
+                    @foreach (var e in SelectedEvents.Where(e => DistinctEvents.Contains(e)).OrderBy(e => e.Name))
+                    {
+                      <button type="button" @onclick="() => {
+                          SelectedEvents.Remove(e);
+                          UpdateUrls();
+                      }" class="list-group-item list-group-item-action">@e.Name</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div>
-    <button class="btn btn-primary" @onclick="GenerateReportAsync">
-        Update Report
+    <button class="btn btn-primary" @onclick="GenerateReportAsync" disabled="@fetchingEvents">
+        Generate Report
     </button>
 </div>
 <p />
@@ -63,19 +89,22 @@
 </div>
 
 <h4>Excel Reports: (right-click to save)</h4>
-<a href="@("api/report/student-list" + urlDateRangeSegment)">Student Report</a>
+<a href="@("api/report/student-list" + urlDateRangeSegment + "?" + urlEventIdsSegment)" disabled="@fetchingEvents">Student Report</a>
 
 @code {
     public IDictionary<string, int> CheckInCounts { get; set; }
     public IDictionary<string, int> UniqueStudentCounts { get; set; }
     public IList<(int Id, string Name)> DistinctEvents = new List<(int Id, string Name)>();
-    public int EventIdFilter { get; set; }
+    public IList<(int Id, string Name)> SelectedEvents = new List<(int Id, string Name)>();
     public int EventInstanceCount { get; set; }
 
     private string urlDateRangeSegment = "";
+    private string urlEventIdsSegment = "";
+    private bool fetchingEvents = true;
 
     private DateTime _start = new DateTime(2019, 1, 1);
     private DateTime _end = new DateTime(2020, 12, 31);
+
 
     public DateTime Start
     {
@@ -86,6 +115,7 @@
         set
         {
             _start = value;
+            GetEventsAsync();
             UpdateUrls();
         }
     }
@@ -99,6 +129,7 @@
         set
         {
             _end = value;
+            GetEventsAsync();
             UpdateUrls();
         }
     }
@@ -111,7 +142,7 @@
         Start = new DateTime(schoolStartYear, 8, 1);
         End = Start + TimeSpan.FromDays(365);
 
-        DistinctEvents = (await _eventService.GetEventsAsync()).Select(e => (e.Id, e.Name)).OrderBy(e => e.Name).ToList();
+        await GetEventsAsync();
 
         await GenerateReportAsync();
 
@@ -121,18 +152,21 @@
     private async Task GenerateReportAsync()
     {
         var normalizedEnd = End + TimeSpan.FromDays(1);
-        CheckInCounts = await _reportingService.GetCheckInCountsAsync(Start, normalizedEnd, EventIdFilter);
-        UniqueStudentCounts = await _reportingService.GetUniqueStudentCountsAsync(Start, normalizedEnd, EventIdFilter);
-        EventInstanceCount = await _reportingService.GetEventInstanceCountAsync(Start, normalizedEnd, EventIdFilter);
+        CheckInCounts = await _reportingService.GetCheckInCountsAsync(Start, normalizedEnd, SelectedEvents.Select(e => e.Id).ToList());
+        UniqueStudentCounts = await _reportingService.GetUniqueStudentCountsAsync(Start, normalizedEnd, SelectedEvents.Select(e => e.Id).ToList());
+        EventInstanceCount = await _reportingService.GetEventInstanceCountAsync(Start, normalizedEnd, SelectedEvents.Select(e => e.Id).ToList());
     }
 
     private void UpdateUrls()
     {
         urlDateRangeSegment = $"/{Start.Month}-{Start.Day}-{Start.Year}/{End.Month}-{End.Day}-{End.Year}";
+        urlEventIdsSegment = SelectedEvents.Count > 0 ? "eventIds=" + String.Join("&eventIds=", SelectedEvents.Select(e => e.Id.ToString())) : "";
     }
 
-    private void FilterChanged(ChangeEventArgs args)
+    private async Task GetEventsAsync()
     {
-        EventIdFilter = int.Parse((string)args.Value);
+        fetchingEvents = true;
+        DistinctEvents = (await _eventService.GetEventsAsync(Start, End + TimeSpan.FromDays(1))).Select(e => (e.Id, e.Name)).OrderBy(e => e.Name).ToList();
+        fetchingEvents = false;
     }
 }

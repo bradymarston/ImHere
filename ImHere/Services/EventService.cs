@@ -28,6 +28,11 @@ namespace ImHere.Services
             return (await _eventRepository.GetAsync()).ToDto();
         }
 
+        public async Task<IEnumerable<EventDto>> GetEventsAsync(DateTime start, DateTime end)
+        {
+            return (await _eventRepository.GetAsync(start, end)).ToDto();
+        }
+
         public async Task<EventDto> GetEventAsync(int eventId)
         {
             return (await _eventRepository.GetAsync(eventId)).ToDto();

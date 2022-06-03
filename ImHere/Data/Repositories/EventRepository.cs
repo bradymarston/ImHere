@@ -28,6 +28,11 @@ namespace ImHere.Data.Repositories
             return await _context.Events.AddDefaultInclusions().ToListAsync();
         }
 
+        public async Task<IEnumerable<Event>> GetAsync(DateTime start, DateTime end)
+        {
+            return await _context.Events.Where(e => e.CheckIns.Any(c => c.TimeStamp >= start && c.TimeStamp <= end)).AddDefaultInclusions().ToListAsync();
+        }
+
         public async Task<Event> GetAsync(int id)
         {
             return await _context.Events.AddDefaultInclusions().FirstOrDefaultAsync(e => e.Id == id);

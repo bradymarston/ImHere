@@ -26,9 +26,9 @@ namespace ImHere.Controllers
         }
 
         [HttpGet("student-list/{startString}/{endString}")]
-        public async Task<IActionResult> GetStudentList (string startString, string endString)
+        public async Task<IActionResult> GetStudentList (string startString, string endString, [FromQuery] int[] eventIds)
         {
-            var students = await _reportingService.GetStudentOverviewReportDataAsync(ParseDateString(startString), ParseDateString(endString) + TimeSpan.FromHours(24));
+            var students = await _reportingService.GetStudentOverviewReportDataAsync(ParseDateString(startString), ParseDateString(endString) + TimeSpan.FromHours(24), eventIds.ToList());
 
             var fileContent = "First Name,Last Name,Type,Methodist?,Email,Phone Number,Check-In Count,First Check-In,Last Check-In\n";
 

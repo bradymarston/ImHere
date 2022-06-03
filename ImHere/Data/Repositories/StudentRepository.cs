@@ -45,10 +45,10 @@ namespace ImHere.Data.Repositories
             return await _context.Students.AddDefaultInclusions().Where(s => !s.CheckIns.Any(c => c.EventId == eventId && c.EventStart == start)).ToListAsync();
         }
 
-        public async Task<IEnumerable<StudentOverviewRpto>> GetStudentReportDataAsync(DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<StudentOverviewRpto>> GetStudentReportDataAsync(DateTime startDate, DateTime endDate, IList<int> eventIds = null)
         {
             return await _context.Students
-                .Where(s => s.CheckIns.Count() == 0 || s.CheckIns.Any(c => c.TimeStamp >= startDate && c.TimeStamp <= endDate))
+                .Where(s => s.CheckIns.Count() == 0 || s.CheckIns.Any(c => c.TimeStamp >= startDate && c.TimeStamp <= endDate && (eventIds == null || eventIds.Contains(c.EventId))))
                 .Select(s =>
                 new StudentOverviewRpto()
                 {

@@ -29,24 +29,24 @@ namespace ImHere.Services
             return checkIns.ToEventInstanceDto();
         }
 
-        public async Task<IDictionary<string, int>> GetCheckInCountsAsync(DateTime start, DateTime end, int eventId)
+        public async Task<IDictionary<string, int>> GetCheckInCountsAsync(DateTime start, DateTime end, IList<int> eventIds)
         {
-            return await _checkInRepository.GetCheckInCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && (eventId == 0 || c.EventId == eventId));
+            return await _checkInRepository.GetCheckInCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && eventIds.Contains(c.EventId));
         }
 
-        public async Task<IDictionary<string, int>> GetUniqueStudentCountsAsync(DateTime start, DateTime end, int eventId)
+        public async Task<IDictionary<string, int>> GetUniqueStudentCountsAsync(DateTime start, DateTime end, IList<int> eventIds)
         {
-            return await _checkInRepository.GetUniqueStudentCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && (eventId == 0 || c.EventId == eventId));
+            return await _checkInRepository.GetUniqueStudentCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && eventIds.Contains(c.EventId));
         }
 
-        public async Task<int> GetEventInstanceCountAsync(DateTime start, DateTime end, int eventId)
+        public async Task<int> GetEventInstanceCountAsync(DateTime start, DateTime end, IList<int> eventIds)
         {
-            return await _checkInRepository.GetEventInstanceCountAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && (eventId == 0 || c.EventId == eventId));
+            return await _checkInRepository.GetEventInstanceCountAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && eventIds.Contains(c.EventId));
         }
 
-        public async Task<IEnumerable<StudentOverviewRpto>> GetStudentOverviewReportDataAsync(DateTime start, DateTime end)
+        public async Task<IEnumerable<StudentOverviewRpto>> GetStudentOverviewReportDataAsync(DateTime start, DateTime end, IList<int> eventIds = null)
         {
-            return await _studentRepository.GetStudentReportDataAsync(start, end);
+            return await _studentRepository.GetStudentReportDataAsync(start, end, eventIds);
         }
 
         public async Task<IEnumerable<CheckInDto>> GetEventCheckInReportDataAsync(int eventId, DateTime eventStart)
