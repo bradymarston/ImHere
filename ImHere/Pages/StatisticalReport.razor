@@ -53,6 +53,7 @@
         </div>
     </div>
 </div>
+<p />
 <div>
     <button class="btn btn-primary" @onclick="GenerateReportAsync" disabled="@fetchingEvents">
         Generate Report
@@ -139,7 +140,7 @@
     {
         var schoolStartYear = DateTime.UtcNow.Month > 7 ? DateTime.UtcNow.Year : DateTime.UtcNow.Year - 1;
 
-        Start = new DateTime(schoolStartYear, 8, 1);
+        Start = new DateTime(schoolStartYear, 6, 15);
         End = Start + TimeSpan.FromDays(365);
 
         await GetEventsAsync();

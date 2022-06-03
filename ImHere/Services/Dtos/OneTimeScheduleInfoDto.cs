@@ -8,5 +8,10 @@ namespace ImHere.Services.Dtos
     public class OneTimeScheduleInfoDto : EventScheduleInfoDtoBase
     {
         public DateTime Date { get; set; }
+
+        public OneTimeScheduleInfoDto()
+        {
+            Date = DateTime.Now.Date;
+        }
     }
 }
