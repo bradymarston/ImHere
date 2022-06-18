@@ -31,17 +31,17 @@ namespace ImHere.Services
 
         public async Task<IDictionary<string, int>> GetCheckInCountsAsync(DateTime start, DateTime end, IList<int> eventIds)
         {
-            return await _checkInRepository.GetCheckInCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && eventIds.Contains(c.EventId));
+            return await _checkInRepository.GetCheckInCountsAsync(c => c.EventStart >= start && c.EventStart <= end && eventIds.Contains(c.EventId));
         }
 
-        public async Task<IDictionary<string, int>> GetUniqueStudentCountsAsync(DateTime start, DateTime end, IList<int> eventIds)
+        public async Task<IDictionary<string, (int Total, int MethodistLocalChurch, int OtherLocalChurch)>> GetUniqueStudentCountsAsync(DateTime start, DateTime end, IList<int> eventIds)
         {
-            return await _checkInRepository.GetUniqueStudentCountsAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && eventIds.Contains(c.EventId));
+            return await _checkInRepository.GetUniqueStudentCountsAsync(c => c.EventStart >= start && c.EventStart <= end && eventIds.Contains(c.EventId));
         }
 
         public async Task<int> GetEventInstanceCountAsync(DateTime start, DateTime end, IList<int> eventIds)
         {
-            return await _checkInRepository.GetEventInstanceCountAsync(c => c.TimeStamp >= start && c.TimeStamp <= end && eventIds.Contains(c.EventId));
+            return await _checkInRepository.GetEventInstanceCountAsync(c => c.EventStart >= start && c.EventStart <= end && eventIds.Contains(c.EventId));
         }
 
         public async Task<IEnumerable<StudentOverviewRpto>> GetStudentOverviewReportDataAsync(DateTime start, DateTime end, IList<int> eventIds = null)

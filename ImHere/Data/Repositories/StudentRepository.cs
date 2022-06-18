@@ -48,7 +48,7 @@ namespace ImHere.Data.Repositories
         public async Task<IEnumerable<StudentOverviewRpto>> GetStudentReportDataAsync(DateTime startDate, DateTime endDate, IList<int> eventIds = null)
         {
             return await _context.Students
-                .Where(s => s.CheckIns.Count() == 0 || s.CheckIns.Any(c => c.TimeStamp >= startDate && c.TimeStamp <= endDate && (eventIds == null || eventIds.Contains(c.EventId))))
+                .Where(s => s.CheckIns.Any(c => c.EventStart >= startDate && c.EventStart <= endDate && (eventIds == null || eventIds.Contains(c.EventId))))
                 .Select(s =>
                 new StudentOverviewRpto()
                 {
@@ -60,6 +60,7 @@ namespace ImHere.Data.Repositories
                     Email = s.Email,
                     Phone = s.Phone,
                     IsMethodist = s.IsMethodist,
+                    LocalChurch = s.LocalChurch == LocalChurch.Methodist ? "Methodist" : s.LocalChurch == LocalChurch.NonMethodist ? "Non-Methodist" : "None",
                     CheckInCount = s.CheckIns.Count(),
                     FirstCheckIn = s.CheckIns.Min(c => c.TimeStamp),
                     LastCheckIn = s.CheckIns.Max(c => c.TimeStamp)

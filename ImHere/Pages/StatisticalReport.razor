@@ -63,11 +63,12 @@
 <div class="form-row col-md-11 col-lg-8 col-xl-6">
     <div class="text-right">
         <p>
-            <strong>Unique Attendees: @UniqueStudentCounts.Sum(c => c.Value)</strong>
+            <strong>Unique Attendees: (@UniqueStudentCounts.Sum(c => c.Value.Total), @UniqueStudentCounts.Sum(c => c.Value.MethodistLocalChurch), @UniqueStudentCounts.Sum(c => c.Value.OtherLocalChurch))</strong>
             @foreach (var count in UniqueStudentCounts)
             {
                 <div>@($"{count.Key}: {count.Value}")</div>
             }
+            <div><small>(Total, Meth Church, Other Church)</small></div>
         </p>
         @if (EventInstanceCount > 0)
         {
@@ -94,7 +95,7 @@
 
 @code {
     public IDictionary<string, int> CheckInCounts { get; set; }
-    public IDictionary<string, int> UniqueStudentCounts { get; set; }
+    public IDictionary<string, (int Total, int MethodistLocalChurch, int OtherLocalChurch)> UniqueStudentCounts { get; set; }
     public IList<(int Id, string Name)> DistinctEvents = new List<(int Id, string Name)>();
     public IList<(int Id, string Name)> SelectedEvents = new List<(int Id, string Name)>();
     public int EventInstanceCount { get; set; }

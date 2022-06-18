@@ -30,7 +30,7 @@ namespace ImHere.Data.Repositories
 
         public async Task<IEnumerable<Event>> GetAsync(DateTime start, DateTime end)
         {
-            return await _context.Events.Where(e => e.CheckIns.Any(c => c.TimeStamp >= start && c.TimeStamp <= end)).AddDefaultInclusions().ToListAsync();
+            return await _context.Events.Where(e => e.CheckIns.Any(c => c.EventStart >= start && c.EventStart <= end)).AddDefaultInclusions().ToListAsync();
         }
 
         public async Task<Event> GetAsync(int id)

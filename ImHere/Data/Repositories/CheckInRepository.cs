@@ -70,9 +70,9 @@ namespace ImHere.Data.Repositories
             return await _context.CheckIns.AddDefaultInclusions().Where(c => !c.IsAdminCheckIn && c.StudentId == studentId).OrderBy(c => c.TimeStamp).FirstOrDefaultAsync();
         }
 
-        public async Task<IDictionary<string, int>> GetUniqueStudentCountsAsync(Expression<Func<CheckIn, bool>> predicate)
+        public async Task<IDictionary<string, (int Total, int MethodistLocalChurch, int OtherLocalChurch)>> GetUniqueStudentCountsAsync(Expression<Func<CheckIn, bool>> predicate)
         {
-            return (await _context.CheckIns.AddDefaultInclusions().Where(predicate).ToListAsync()).GroupBy(c => c.Student.StudentType.Description).OrderBy(c => c.First().Student.StudentTypeId).ToDictionary(g => g.Key, g => g.GroupBy(c => c.Student).Count());
+            return (await _context.CheckIns.AddDefaultInclusions().Where(predicate).ToListAsync()).GroupBy(c => c.Student.StudentType.Description).OrderBy(c => c.First().Student.StudentTypeId).ToDictionary(g => g.Key, g => (g.GroupBy(c => c.Student).Count(), g.Where(c => c.Student.LocalChurch == LocalChurch.Methodist).GroupBy(c => c.Student).Count(), g.Where(c => c.Student.LocalChurch == LocalChurch.NonMethodist).GroupBy(c => c.Student).Count()));
         }
 
         public void Remove(CheckIn item)
